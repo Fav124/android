@@ -1,0 +1,176 @@
+<resources>
+    <string name="app_name">DEIHealth Mobile</string>
+
+    <!-- Common -->
+    <string name="back">Kembali</string>
+    <string name="retry">Coba Lagi</string>
+    <string name="save">Simpan</string>
+    <string name="detail">Detail</string>
+    <string name="notes">Catatan</string>
+    <string name="status">Status</string>
+    <string name="name">Nama</string>
+    <string name="description">Deskripsi</string>
+    <string name="date">Tanggal</string>
+    <string name="loading">Memuat...</string>
+
+    <!-- Login Screen -->
+    <string name="login_title">Masuk</string>
+    <string name="login_description">Gunakan akun website yang sudah disetujui agar data Android dan web tetap sinkron.</string>
+    <string name="login_email_label">Email</string>
+    <string name="login_password_label">Password</string>
+    <string name="login_button">Masuk ke Aplikasi</string>
+    <string name="login_demo_hint">Lihat akun demo</string>
+    <string name="login_demo_credentials">Akun demo: petugas@deisa.com / PetugasUks@123</string>
+    <string name="login_welcome_title">DEIHealth Mobile</string>
+    <string name="login_welcome_description">Tampilan minimalis dengan warna hijau utama dan alur cepat untuk petugas kesehatan.</string>
+    <string name="role_petugas">Petugas</string>
+    <string name="role_admin">Admin</string>
+    <string name="role_super_admin">Super Admin</string>
+
+    <!-- Sidebar / Tabs -->
+    <string name="sidebar_open">Buka sidebar</string>
+    <string name="sidebar_close">Tutup sidebar</string>
+    <string name="tab_dashboard">Dashboard</string>
+    <string name="tab_santri">Data Santri</string>
+    <string name="tab_medicines">Data Obat</string>
+    <string name="tab_beds">Kasur UKS</string>
+    <string name="tab_dormitories">Asrama</string>
+    <string name="tab_cases">Santri Sakit</string>
+    <string name="tab_referrals">Rujukan</string>
+    <string name="tab_reports">Laporan</string>
+    <string name="tab_profile">Profil</string>
+    <string name="logout">Keluar</string>
+    <string name="refresh_data">Muat Ulang Data</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_panel_title">Operasional Kesehatan Santri</string>
+    <string name="dashboard_panel_desc">Semua modul utama sudah tersedia di sidebar: santri, obat, asrama, kasur UKS, kasus sakit, rujukan, dan laporan.</string>
+    <string name="stat_santri">Santri</string>
+    <string name="stat_active_cases">Kasus Aktif</string>
+    <string name="stat_referrals">Rujukan</string>
+    <string name="stat_beds">Kasur</string>
+    <string name="recent_cases">Kasus Terbaru</string>
+    <string name="recent_referrals">Rujukan Terbaru</string>
+    <string name="empty_recent_cases">Belum ada kasus terbaru.</string>
+    <string name="empty_recent_referrals">Belum ada rujukan terbaru.</string>
+
+    <!-- Santri -->
+    <string name="santri_detail">Detail Santri</string>
+    <string name="santri_nis">NIS</string>
+    <string name="santri_gender">Gender</string>
+    <string name="santri_class">Kelas</string>
+    <string name="santri_major">Jurusan</string>
+    <string name="santri_dormitory">Asrama</string>
+    <string name="santri_birth_place">Tempat Lahir</string>
+    <string name="santri_birth_date">Tanggal Lahir</string>
+    <string name="santri_class_room">Ruang/Kelas</string>
+    <string name="santri_dorm_room">Kamar Asrama</string>
+    <string name="santri_guardian_name">Nama Wali</string>
+    <string name="santri_guardian_phone">No. Wali</string>
+    <string name="empty_santri">Belum ada data santri.</string>
+    <string name="add_santri">Tambah Santri</string>
+    <string name="save_santri">Simpan Santri</string>
+
+    <!-- Medicines -->
+    <string name="medicine_detail">Detail Obat</string>
+    <string name="medicine_unit">Satuan</string>
+    <string name="medicine_stock">Stok</string>
+    <string name="medicine_min_stock">Minimum Stok</string>
+    <string name="medicine_expiry">Kedaluwarsa</string>
+    <string name="medicine_status_expired">Kedaluwarsa</string>
+    <string name="medicine_status_low">Stok menipis</string>
+    <string name="medicine_status_soon">Segera kedaluwarsa</string>
+    <string name="medicine_status_safe">Aman</string>
+    <string name="empty_medicines">Belum ada data obat.</string>
+    <string name="add_medicine">Tambah Obat</string>
+    <string name="save_medicine">Simpan Obat</string>
+    <string name="medicine_name_label">Nama Obat</string>
+
+    <!-- Beds -->
+    <string name="bed_detail">Detail Kasur UKS</string>
+    <string name="bed_code">Kode</string>
+    <string name="bed_room">Ruangan</string>
+    <string name="bed_occupant">Penghuni</string>
+    <string name="empty_beds">Belum ada data kasur UKS.</string>
+    <string name="empty_occupant">Belum ada penghuni</string>
+    <string name="add_bed">Tambah Kasur UKS</string>
+    <string name="save_bed">Simpan Kasur</string>
+    <string name="bed_room_label">Nama Ruangan</string>
+    <string name="bed_occupant_label">Nama Penghuni</string>
+
+    <!-- Dormitories -->
+    <string name="dormitory_detail">Detail Asrama</string>
+    <string name="dormitory_building">Gedung</string>
+    <string name="dormitory_supervisor">Musyrif / Pembina</string>
+    <string name="dormitory_santri_count">Jumlah Santri</string>
+    <string name="empty_dormitories">Belum ada data asrama.</string>
+    <string name="empty_building">Gedung belum diisi</string>
+    <string name="santri_count_suffix">%1$d santri</string>
+    <string name="add_dormitory">Tambah Asrama</string>
+    <string name="save_dormitory">Simpan Asrama</string>
+    <string name="dormitory_name_label">Nama Asrama</string>
+
+    <!-- Cases -->
+    <string name="case_detail">Detail Kasus Sakit</string>
+    <string name="case_santri">Santri</string>
+    <string name="case_complaint">Keluhan</string>
+    <string name="case_diagnosis">Diagnosis</string>
+    <string name="case_action">Tindakan</string>
+    <string name="case_bed">Kasur</string>
+    <string name="case_medicine">Obat</string>
+    <string name="empty_cases">Belum ada data santri sakit.</string>
+    <string name="add_case">Tambah Kasus Sakit</string>
+    <string name="save_case">Simpan Kasus</string>
+    <string name="case_medicine_notes">Catatan Obat</string>
+
+    <!-- Referrals -->
+    <string name="referral_detail">Detail Rujukan</string>
+    <string name="referral_hospital">Rumah Sakit</string>
+    <string name="referral_reason">Alasan</string>
+    <string name="referral_transport">Transport</string>
+    <string name="referral_companion">Pendamping</string>
+    <string name="empty_referrals">Belum ada data rujukan.</string>
+    <string name="add_referral">Tambah Rujukan</string>
+    <string name="save_referral">Simpan Rujukan</string>
+    <string name="referral_reason_label">Alasan Rujukan</string>
+    <string name="referral_transport_default">Ambulans Pondok</string>
+
+    <!-- Reports -->
+    <string name="report_empty">Laporan belum tersedia.</string>
+    <string name="report_period_format">Periode %1$s s/d %2$s</string>
+    <string name="report_panel_desc">Ringkasan laporan diambil langsung dari backend Laravel.</string>
+    <string name="stat_sick">Sakit</string>
+    <string name="stat_low_medicine">Obat Menipis</string>
+    <string name="top_complaints">Keluhan / Diagnosis Teratas</string>
+    <string name="empty_data">Belum ada data.</string>
+    <string name="total_occurrence_format">Total kejadian %1$d</string>
+    <string name="no_low_medicine">Tidak ada obat menipis.</string>
+    <string name="stock_format">Stok %1$d/%2$d %3$s</string>
+
+    <!-- Profile -->
+    <string name="profile_title">Profil Pengguna</string>
+    <string name="profile_email">Email</string>
+    <string name="profile_role">Role</string>
+    <string name="profile_integration">Integrasi</string>
+    <string name="profile_base_url">Base URL</string>
+    <string name="profile_auth">Autentikasi</string>
+    <string name="profile_sync">Sinkronisasi</string>
+    <string name="profile_sync_desc">Android dan web memakai data yang sama</string>
+
+    <!-- Form Helpers -->
+    <string name="placeholder_select_class">Pilih kelas</string>
+    <string name="placeholder_no_class">Tanpa kelas</string>
+    <string name="placeholder_select_major">Pilih jurusan</string>
+    <string name="placeholder_no_major">Tanpa jurusan</string>
+    <string name="placeholder_select_dormitory">Pilih asrama</string>
+    <string name="placeholder_no_dormitory">Tanpa asrama</string>
+    <string name="placeholder_select_santri">Pilih santri</string>
+    <string name="placeholder_select_bed">Pilih kasur</string>
+    <string name="placeholder_no_bed">Tanpa kasur</string>
+    <string name="placeholder_date_format">YYYY-MM-DD</string>
+    <string name="press_for_detail">Tekan untuk melihat detail</string>
+    <string name="add_data_desc">Tambah data</string>
+    <string name="default_role_label">Petugas Kesehatan</string>
+    <string name="default_user_name">Pengguna</string>
+    <string name="sidebar_header_subtitle">Mobile Access</string>
+</resources>
