@@ -8,29 +8,32 @@ interface ApiService {
 
     // ─── Auth ────────────────────────────────────────────────────────────────
 
-    @POST("login")
+    @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 
-    @POST("logout")
+    @POST("auth/register")
+    suspend fun register(@Body request: RegisterRequest): Response<ApiResponse<User>>
+
+    @POST("auth/logout")
     suspend fun logout(): Response<ApiResponse<Unit>>
 
-    @GET("me")
+    @GET("auth/me")
     suspend fun me(): Response<ApiResponse<User>>
 
     // ─── Dashboard ───────────────────────────────────────────────────────────
 
-    @GET("dashboard")
+    @GET("dashboard/summary")
     suspend fun getDashboard(
         @Query("start_date") startDate: String? = null,
         @Query("end_date")   endDate: String? = null,
     ): Response<ApiResponse<DashboardData>>
 
-    // ─── Kasus Sakit ─────────────────────────────────────────────────────────
+    // ─── Kasus Sakit (Kunjungan) ─────────────────────────────────────────────
 
-    @GET("sickness-cases/lookups")
+    @GET("kunjungan-form-data")
     suspend fun getSicknessLookups(): Response<ApiResponse<SicknessLookups>>
 
-    @GET("sickness-cases")
+    @GET("kunjungan")
     suspend fun getSicknessCases(
         @Query("status")     status: String? = null,
         @Query("search")     search: String? = null,
@@ -40,22 +43,22 @@ interface ApiService {
         @Query("per_page")   perPage: Int = 15,
     ): Response<PaginatedResponse<SicknessCase>>
 
-    @GET("sickness-cases/{id}")
+    @GET("kunjungan/{id}")
     suspend fun getSicknessCase(@Path("id") id: Int): Response<ApiResponse<SicknessCase>>
 
-    @POST("sickness-cases")
+    @POST("kunjungan")
     suspend fun createSicknessCase(@Body request: SicknessRequest): Response<ApiResponse<SicknessCase>>
 
-    @PUT("sickness-cases/{id}")
+    @PUT("kunjungan/{id}")
     suspend fun updateSicknessCase(@Path("id") id: Int, @Body request: SicknessRequest): Response<ApiResponse<SicknessCase>>
 
-    @DELETE("sickness-cases/{id}")
+    @DELETE("kunjungan/{id}")
     suspend fun deleteSicknessCase(@Path("id") id: Int): Response<ApiResponse<Unit>>
 
-    @POST("sickness-cases/{id}/mark-recovered")
+    @POST("monitoring/{id}/selesai")
     suspend fun markRecovered(@Path("id") id: Int): Response<ApiResponse<Map<String, String>>>
 
-    @POST("sickness-cases/{id}/notify-guardian")
+    @POST("kunjungan/{id}/notify-guardian")
     suspend fun notifySicknessGuardian(@Path("id") id: Int): Response<ApiResponse<Unit>>
 
     // ─── Santri ──────────────────────────────────────────────────────────────
@@ -87,7 +90,7 @@ interface ApiService {
 
     // ─── Obat ────────────────────────────────────────────────────────────────
 
-    @GET("medicines")
+    @GET("obat")
     suspend fun getMedicines(
         @Query("search")        search: String? = null,
         @Query("low_stock")     lowStock: Boolean? = null,
@@ -97,73 +100,73 @@ interface ApiService {
         @Query("per_page")      perPage: Int = 20,
     ): Response<PaginatedResponse<Medicine>>
 
-    @GET("medicines/{id}")
+    @GET("obat/{id}")
     suspend fun getMedicine(@Path("id") id: Int): Response<ApiResponse<Medicine>>
 
-    @POST("medicines")
+    @POST("obat")
     suspend fun createMedicine(@Body body: Map<String, @JvmSuppressWildcards Any?>): Response<ApiResponse<Medicine>>
 
-    @PUT("medicines/{id}")
+    @PUT("obat/{id}")
     suspend fun updateMedicine(@Path("id") id: Int, @Body body: Map<String, @JvmSuppressWildcards Any?>): Response<ApiResponse<Medicine>>
 
-    @DELETE("medicines/{id}")
+    @DELETE("obat/{id}")
     suspend fun deleteMedicine(@Path("id") id: Int): Response<ApiResponse<Unit>>
 
     // ─── Kasur UKS ───────────────────────────────────────────────────────────
 
-    @GET("beds")
+    @GET("rawat-inap")
     suspend fun getBeds(@Query("status") status: String? = null): Response<ApiResponse<List<InfirmaryBed>>>
 
-    @POST("beds")
+    @POST("rawat-inap")
     suspend fun createBed(@Body body: Map<String, @JvmSuppressWildcards Any?>): Response<ApiResponse<InfirmaryBed>>
 
-    @PUT("beds/{id}")
+    @PUT("rawat-inap/{id}")
     suspend fun updateBed(@Path("id") id: Int, @Body body: Map<String, @JvmSuppressWildcards Any?>): Response<ApiResponse<InfirmaryBed>>
 
-    @DELETE("beds/{id}")
+    @DELETE("rawat-inap/{id}")
     suspend fun deleteBed(@Path("id") id: Int): Response<ApiResponse<Unit>>
 
     // ─── Master Data ────────────────────────────────────────────────────────
 
-    @GET("master/classes")
+    @GET("master/kelas")
     suspend fun getClasses(): Response<ApiResponse<ItemsResponse<SchoolClassItem>>>
 
-    @POST("master/classes")
+    @POST("master/kelas")
     suspend fun createClass(@Body body: Map<String, @JvmSuppressWildcards Any?>): Response<ApiResponse<ItemResponse<SchoolClassItem>>>
 
-    @PUT("master/classes/{id}")
+    @PUT("master/kelas/{id}")
     suspend fun updateClass(@Path("id") id: Int, @Body body: Map<String, @JvmSuppressWildcards Any?>): Response<ApiResponse<ItemResponse<SchoolClassItem>>>
 
-    @DELETE("master/classes/{id}")
+    @DELETE("master/kelas/{id}")
     suspend fun deleteClass(@Path("id") id: Int): Response<ApiResponse<Unit>>
 
-    @GET("master/majors")
+    @GET("master/jurusan")
     suspend fun getMajors(): Response<ApiResponse<ItemsResponse<MajorItem>>>
 
-    @POST("master/majors")
+    @POST("master/jurusan")
     suspend fun createMajor(@Body body: Map<String, @JvmSuppressWildcards Any?>): Response<ApiResponse<ItemResponse<MajorItem>>>
 
-    @PUT("master/majors/{id}")
+    @PUT("master/jurusan/{id}")
     suspend fun updateMajor(@Path("id") id: Int, @Body body: Map<String, @JvmSuppressWildcards Any?>): Response<ApiResponse<ItemResponse<MajorItem>>>
 
-    @DELETE("master/majors/{id}")
+    @DELETE("master/jurusan/{id}")
     suspend fun deleteMajor(@Path("id") id: Int): Response<ApiResponse<Unit>>
 
-    @GET("master/dormitories")
+    @GET("master/kamar")
     suspend fun getDormitories(): Response<ApiResponse<ItemsResponse<DormitoryItem>>>
 
-    @POST("master/dormitories")
+    @POST("master/kamar")
     suspend fun createDormitory(@Body body: Map<String, @JvmSuppressWildcards Any?>): Response<ApiResponse<ItemResponse<DormitoryItem>>>
 
-    @PUT("master/dormitories/{id}")
+    @PUT("master/kamar/{id}")
     suspend fun updateDormitory(@Path("id") id: Int, @Body body: Map<String, @JvmSuppressWildcards Any?>): Response<ApiResponse<ItemResponse<DormitoryItem>>>
 
-    @DELETE("master/dormitories/{id}")
+    @DELETE("master/kamar/{id}")
     suspend fun deleteDormitory(@Path("id") id: Int): Response<ApiResponse<Unit>>
 
     // ─── Rujukan RS ──────────────────────────────────────────────────────────
 
-    @GET("referrals")
+    @GET("rujukan")
     suspend fun getReferrals(
         @Query("status")     status: String? = null,
         @Query("search")     search: String? = null,
@@ -173,24 +176,24 @@ interface ApiService {
         @Query("per_page")   perPage: Int = 15,
     ): Response<PaginatedResponse<HospitalReferral>>
 
-    @GET("referrals/{id}")
+    @GET("rujukan/{id}")
     suspend fun getReferral(@Path("id") id: Int): Response<ApiResponse<HospitalReferral>>
 
-    @POST("referrals")
+    @POST("rujukan")
     suspend fun createReferral(@Body request: ReferralRequest): Response<ApiResponse<HospitalReferral>>
 
-    @PUT("referrals/{id}")
+    @PUT("rujukan/{id}")
     suspend fun updateReferral(@Path("id") id: Int, @Body body: Map<String, @JvmSuppressWildcards Any?>): Response<ApiResponse<HospitalReferral>>
 
-    @DELETE("referrals/{id}")
+    @DELETE("rujukan/{id}")
     suspend fun deleteReferral(@Path("id") id: Int): Response<ApiResponse<Unit>>
 
-    @POST("referrals/{id}/notify-guardian")
+    @POST("rujukan/{id}/notify-guardian")
     suspend fun notifyReferralGuardian(@Path("id") id: Int): Response<ApiResponse<Unit>>
 
     // ─── Laporan ─────────────────────────────────────────────────────────────
 
-    @GET("reports/summary")
+    @GET("reports/daily-summary")
     suspend fun getReportSummary(
         @Query("start_date") startDate: String? = null,
         @Query("end_date")   endDate: String? = null,
@@ -198,10 +201,10 @@ interface ApiService {
 
     // ─── Admin ──────────────────────────────────────────────────────────────
 
-    @GET("admin/overview")
+    @GET("approvals")
     suspend fun getAdminOverview(): Response<ApiResponse<AdminOverviewData>>
 
-    @GET("admin/users")
+    @GET("approvals")
     suspend fun getAdminUsers(
         @Query("status") status: String? = null,
         @Query("role") role: String? = null,
@@ -210,24 +213,32 @@ interface ApiService {
         @Query("per_page") perPage: Int = 20,
     ): Response<PaginatedResponse<AdminUser>>
 
-    @POST("admin/users/{id}/approve")
+    @POST("approvals/{id}/approve")
     suspend fun approveUser(@Path("id") id: Int): Response<ApiResponse<ItemResponse<AdminUser>>>
 
-    @POST("admin/users/{id}/reject")
+    @POST("approvals/{id}/reject")
     suspend fun rejectUser(
         @Path("id") id: Int,
         @Body body: Map<String, @JvmSuppressWildcards Any?> = emptyMap(),
     ): Response<ApiResponse<ItemResponse<AdminUser>>>
 
-    @POST("admin/users/{id}/change-role")
+    @POST("auth/change-role")
     suspend fun changeUserRole(
         @Path("id") id: Int,
         @Body body: Map<String, @JvmSuppressWildcards Any?>,
     ): Response<ApiResponse<ItemResponse<AdminUser>>>
 
-    @POST("admin/users/{id}/quick-reset")
+    @POST("auth/quick-reset")
     suspend fun quickResetUser(@Path("id") id: Int): Response<ApiResponse<ItemResponse<AdminUser>>>
 
-    @DELETE("admin/users/{id}")
+    @DELETE("auth/users/{id}")
     suspend fun deleteUser(@Path("id") id: Int): Response<ApiResponse<Unit>>
+
+    // ─── Settings ───────────────────────────────────────────────────────────
+
+    @GET("settings")
+    suspend fun getSettings(): Response<ApiResponse<Map<String, String>>>
+
+    @POST("settings")
+    suspend fun updateSettings(@Body body: Map<String, @JvmSuppressWildcards Any?>): Response<ApiResponse<Unit>>
 }

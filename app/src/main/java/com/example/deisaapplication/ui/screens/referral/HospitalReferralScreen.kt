@@ -52,11 +52,6 @@ fun HospitalReferralScreen(
             DeisaTopBar(
                 title = "Rujukan RS",
                 onOpenDrawer = onOpenDrawer,
-                actions = {
-                    IconButton(onClick = { viewModel.loadList(selectedStatus, search.takeIf { it.isNotBlank() }) }) {
-                        Icon(Icons.Filled.Refresh, "Refresh", tint = Primary)
-                    }
-                }
             )
         },
         floatingActionButton = {
@@ -162,12 +157,12 @@ private fun ReferralItem(
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
                 Column(Modifier.weight(1f)) {
                     Text(ref.santri?.name ?: "—", fontWeight = FontWeight.SemiBold, color = OnAppBackground, fontSize = 14.sp)
-                    Text(ref.hospitalName, fontSize = 12.sp, color = Primary, fontWeight = FontWeight.Medium)
+                    Text(ref.hospitalName ?: "Nama RS Belum Diisi", fontSize = 12.sp, color = Primary, fontWeight = FontWeight.Medium)
                 }
                 StatusBadge(ref.status, ref.statusLabel)
             }
             Spacer(Modifier.height(6.dp))
-            Text(ref.complaint.take(60), fontSize = 12.sp, color = MutedText)
+            Text(ref.complaint?.take(60) ?: "Keluhan tidak ada", fontSize = 12.sp, color = MutedText)
             if (ref.diagnosis != null) Text("Diagnosa: ${ref.diagnosis}", fontSize = 12.sp, color = MutedText)
             Spacer(Modifier.height(8.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {

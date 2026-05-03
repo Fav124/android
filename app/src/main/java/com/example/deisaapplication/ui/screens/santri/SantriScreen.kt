@@ -53,11 +53,6 @@ fun SantriScreen(
             DeisaTopBar(
                 title = "Data Santri",
                 onOpenDrawer = onOpenDrawer,
-                actions = {
-                    IconButton(onClick = { viewModel.loadList(search.takeIf { it.isNotBlank() }, classId = selectedClass?.id) }) {
-                        Icon(Icons.Filled.Refresh, "Refresh", tint = Primary)
-                    }
-                }
             )
         },
         floatingActionButton = {
@@ -83,6 +78,9 @@ fun SantriScreen(
             contentAlignment = Alignment.TopCenter
         ) {
             Column(Modifier.fillMaxSize()) {
+                if (state.isLoading) {
+                    DeisaLoadingBar()
+                }
                 OutlinedTextField(
                     value = search, onValueChange = { 
                         search = it

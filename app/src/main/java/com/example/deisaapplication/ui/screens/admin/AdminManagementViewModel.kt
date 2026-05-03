@@ -48,9 +48,9 @@ class AdminManagementViewModel(
                         _state.update { it.copy(error = "Gagal memuat data user.", isLoading = false) }
                     }
                 }
-                .onFailure {
+                .onFailure { exception ->
                     _state.update { state ->
-                        state.copy(error = it.message ?: "Gagal memuat data user.", isLoading = false)
+                        state.copy(error = exception.message ?: "Gagal memuat data user.", isLoading = false)
                     }
                 }
         }
@@ -88,8 +88,8 @@ class AdminManagementViewModel(
                         _state.update { it.copy(isLoading = false, toast = "Gagal mereset password.") }
                     }
                 }
-                .onFailure {
-                    _state.update { it.copy(isLoading = false, toast = it.message ?: "Gagal mereset password.") }
+                .onFailure { exception ->
+                    _state.update { it.copy(isLoading = false, toast = exception.message ?: "Gagal mereset password.") }
                 }
         }
     }
@@ -115,8 +115,8 @@ class AdminManagementViewModel(
                         _state.update { it.copy(isLoading = false, toast = "Permintaan ditolak: ${response.message()}") }
                     }
                 }
-                .onFailure {
-                    _state.update { it.copy(isLoading = false, toast = it.message ?: "Aksi gagal dijalankan.") }
+                .onFailure { exception ->
+                    _state.update { it.copy(isLoading = false, toast = exception.message ?: "Aksi gagal dijalankan.") }
                 }
         }
     }

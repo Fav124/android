@@ -57,18 +57,27 @@ class MasterDataViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             val result = if (id == null) repo.createClass(body) else repo.updateClass(id, body)
-            handleMutation(result, "Data kelas berhasil disimpan.") {
-                loadClasses()
-                onDone(true)
-            } onError@{
-                onDone(false)
-            }
+            handleMutation(
+                result = result,
+                successMessage = "Data kelas berhasil disimpan.",
+                onSuccess = {
+                    loadClasses()
+                    onDone(true)
+                },
+                onError = {
+                    onDone(false)
+                }
+            )
         }
     }
 
     fun deleteClass(id: Int) {
         viewModelScope.launch {
-            handleMutation(repo.deleteClass(id), "Data kelas berhasil dihapus.") { loadClasses() }
+            handleMutation(
+                result = repo.deleteClass(id),
+                successMessage = "Data kelas berhasil dihapus.",
+                onSuccess = { loadClasses() }
+            )
         }
     }
 
@@ -76,18 +85,27 @@ class MasterDataViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             val result = if (id == null) repo.createMajor(body) else repo.updateMajor(id, body)
-            handleMutation(result, "Data jurusan berhasil disimpan.") {
-                loadMajors()
-                onDone(true)
-            } onError@{
-                onDone(false)
-            }
+            handleMutation(
+                result = result,
+                successMessage = "Data jurusan berhasil disimpan.",
+                onSuccess = {
+                    loadMajors()
+                    onDone(true)
+                },
+                onError = {
+                    onDone(false)
+                }
+            )
         }
     }
 
     fun deleteMajor(id: Int) {
         viewModelScope.launch {
-            handleMutation(repo.deleteMajor(id), "Data jurusan berhasil dihapus.") { loadMajors() }
+            handleMutation(
+                result = repo.deleteMajor(id),
+                successMessage = "Data jurusan berhasil dihapus.",
+                onSuccess = { loadMajors() }
+            )
         }
     }
 
@@ -95,18 +113,27 @@ class MasterDataViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             val result = if (id == null) repo.createDormitory(body) else repo.updateDormitory(id, body)
-            handleMutation(result, "Data asrama berhasil disimpan.") {
-                loadDormitories()
-                onDone(true)
-            } onError@{
-                onDone(false)
-            }
+            handleMutation(
+                result = result,
+                successMessage = "Data asrama berhasil disimpan.",
+                onSuccess = {
+                    loadDormitories()
+                    onDone(true)
+                },
+                onError = {
+                    onDone(false)
+                }
+            )
         }
     }
 
     fun deleteDormitory(id: Int) {
         viewModelScope.launch {
-            handleMutation(repo.deleteDormitory(id), "Data asrama berhasil dihapus.") { loadDormitories() }
+            handleMutation(
+                result = repo.deleteDormitory(id),
+                successMessage = "Data asrama berhasil dihapus.",
+                onSuccess = { loadDormitories() }
+            )
         }
     }
 
@@ -125,7 +152,7 @@ class MasterDataViewModel(
                     _state.update { it.copy(error = "Gagal memuat data kelas.") }
                 }
             }
-            .onFailure { _state.update { state -> state.copy(error = it.message ?: "Gagal memuat data kelas.") } }
+            .onFailure { exception -> _state.update { state -> state.copy(error = exception.message ?: "Gagal memuat data kelas.") } }
     }
 
     private suspend fun loadMajors() {
@@ -139,7 +166,7 @@ class MasterDataViewModel(
                     _state.update { it.copy(error = "Gagal memuat data jurusan.") }
                 }
             }
-            .onFailure { _state.update { state -> state.copy(error = it.message ?: "Gagal memuat data jurusan.") } }
+            .onFailure { exception -> _state.update { state -> state.copy(error = exception.message ?: "Gagal memuat data jurusan.") } }
     }
 
     private suspend fun loadDormitories() {
@@ -153,7 +180,7 @@ class MasterDataViewModel(
                     _state.update { it.copy(error = "Gagal memuat data asrama.") }
                 }
             }
-            .onFailure { _state.update { state -> state.copy(error = it.message ?: "Gagal memuat data asrama.") } }
+            .onFailure { exception -> _state.update { state -> state.copy(error = exception.message ?: "Gagal memuat data asrama.") } }
     }
 
     private suspend fun handleMutation(
@@ -162,16 +189,18 @@ class MasterDataViewModel(
         onSuccess: suspend () -> Unit,
         onError: suspend () -> Unit = {},
     ) {
-        result.onSuccess {
-            if (it.isSuccessful) {
-                _state.update { state -> state.copy(isLoading = false, toast = successMessage, error = null) }
-                onSuccess()
-            } else {
-                _state.update { state -> state.copy(isLoading = false, toast = "Permintaan gagal: ${it.message()}") }
-                onError()
+        val response = result.getOrNull()
+        if (response != null && response.isSuccessful) {
+            _state.update { state -> state.copy(isLoading = false, toast = successMessage, error = null) }
+            onSuccess()
+        } else {
+            val exception = result.exceptionOrNull()
+            val errorMessage = when {
+                exception != null -> exception.message ?: "Aksi gagal dijalankan."
+                response != null -> "Permintaan gagal: ${response.message()}"
+                else -> "Terjadi kesalahan tidak diketahui."
             }
-        }.onFailure {
-            _state.update { state -> state.copy(isLoading = false, toast = it.message ?: "Aksi gagal dijalankan.") }
+            _state.update { state -> state.copy(isLoading = false, toast = errorMessage) }
             onError()
         }
     }

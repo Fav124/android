@@ -77,9 +77,9 @@ private fun HospitalReferralDetailContent(
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text(referral.santri?.name ?: "Tanpa Nama", fontWeight = FontWeight.ExtraBold, fontSize = 20.sp, color = OnAppBackground)
-                    Text(referral.hospitalName, fontSize = 16.sp, color = Primary, fontWeight = FontWeight.Bold)
+                    Text(referral.hospitalName ?: "-", fontSize = 16.sp, color = Primary, fontWeight = FontWeight.Bold)
                 }
-                StatusBadge(referral.status, referral.statusLabel)
+                StatusBadge(referral.status, referral.statusLabel ?: "Dirujuk")
             }
         }
 
@@ -98,7 +98,7 @@ private fun HospitalReferralDetailContent(
         // Clinical Details
         SectionHeader("Informasi Medis")
         DeisaCard {
-            DetailItem(Icons.Filled.Sick, "Keluhan", referral.complaint)
+            DetailItem(Icons.Filled.Sick, "Keluhan", referral.complaint ?: "-")
             DeisaDivider()
             DetailItem(Icons.Filled.FactCheck, "Diagnosa Sementara", referral.diagnosis ?: "Belum ada diagnosa")
         }
@@ -119,7 +119,7 @@ private fun HospitalReferralDetailContent(
         if (!referral.notes.isNullOrEmpty()) {
             SectionHeader("Catatan")
             DeisaCard {
-                Text(referral.notes, fontSize = 14.sp, color = OnAppBackground, lineHeight = 20.sp)
+                Text(referral.notes ?: "", fontSize = 14.sp, color = OnAppBackground, lineHeight = 20.sp)
             }
         }
 

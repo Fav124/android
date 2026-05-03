@@ -62,6 +62,10 @@ class SicknessCaseViewModel(private val repo: SicknessCaseRepository) : ViewMode
         }
     }
 
+    fun clearSelected() {
+        _selectedCase.value = null
+    }
+
     fun loadLookups() {
         viewModelScope.launch {
             repo.getLookups()

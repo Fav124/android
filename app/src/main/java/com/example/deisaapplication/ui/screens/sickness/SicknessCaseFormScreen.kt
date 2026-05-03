@@ -47,6 +47,8 @@ fun SicknessCaseFormScreen(
         viewModel.loadLookups()
         if (id != null) {
             viewModel.loadDetail(id)
+        } else {
+            viewModel.clearSelected()
         }
     }
 
@@ -55,7 +57,7 @@ fun SicknessCaseFormScreen(
             selectedSantri = c.santri
             selectedBed = c.bed
             visitDate = c.visitDate ?: LocalDate.now().toString()
-            complaint = c.complaint
+            complaint = c.complaint ?: ""
             diagnosis = c.diagnosis ?: ""
             actionTaken = c.actionTaken ?: ""
             notes = c.notes ?: ""
@@ -101,86 +103,108 @@ fun SicknessCaseFormScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Santri Picker
-            DeisaSearchableDropdown(
-                label = "Santri",
-                items = lookups.santris,
-                selectedItem = selectedSantri,
-                onItemSelected = { selectedSantri = it },
-                itemLabel = { "${it.name} (${it.nis ?: "-"})" }
-            )
+            Text("Informasi Santri & Waktu", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Primary)
+            
+            DeisaCard {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    DeisaSearchableDropdown(
+                        label = "Santri",
+                        items = lookups.santris,
+                        selectedItem = selectedSantri,
+                        onItemSelected = { selectedSantri = it },
+                        itemLabel = { "${it.name} (${it.nis ?: "-"})" }
+                    )
 
-            // Bed Picker
-            DeisaDropdown(
-                label = "Kasur UKS",
-                items = lookups.beds,
-                selectedItem = selectedBed,
-                onItemSelected = { selectedBed = it },
-                itemLabel = { "${it.code} (${it.room ?: "UKS"})" }
-            )
+                    OutlinedTextField(
+                        value = visitDate, onValueChange = { visitDate = it },
+                        label = { Text("Tanggal Kunjungan (YYYY-MM-DD)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
+                    )
+                }
+            }
 
-            OutlinedTextField(
-                value = visitDate, onValueChange = { visitDate = it },
-                label = { Text("Tanggal Kunjungan (YYYY-MM-DD)") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
-            )
+            Text("Pemeriksaan & Diagnosa", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Primary)
+            
+            DeisaCard {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedTextField(
+                        value = complaint, onValueChange = { complaint = it },
+                        label = { Text("Keluhan Utama") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
+                    )
 
-            OutlinedTextField(
-                value = complaint, onValueChange = { complaint = it },
-                label = { Text("Keluhan") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
-            )
+                    OutlinedTextField(
+                        value = diagnosis, onValueChange = { diagnosis = it },
+                        label = { Text("Diagnosa Sementara") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
+                    )
 
-            OutlinedTextField(
-                value = diagnosis, onValueChange = { diagnosis = it },
-                label = { Text("Diagnosa") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
-            )
+                    OutlinedTextField(
+                        value = actionTaken, onValueChange = { actionTaken = it },
+                        label = { Text("Tindakan yang Diberikan") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
+                    )
+                    
+                    DeisaRadioGroup(
+                        label = "Tindak Lanjut / Status",
+                        options = listOf(
+                            "observed" to "Observasi",
+                            "handled" to "Ditangani",
+                            "recovered" to "Sembuh",
+                            "referred" to "Dirujuk",
+                            "rawat_inap" to "Rawat Inap"
+                        ),
+                        selectedOption = status,
+                        onOptionSelected = { status = it }
+                    )
 
-            OutlinedTextField(
-                value = actionTaken, onValueChange = { actionTaken = it },
-                label = { Text("Tindakan") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
-            )
+                    if (status == "observed" || status == "rawat_inap") {
+                        DeisaDropdown(
+                            label = "Pilih Kasur UKS",
+                            items = lookups.beds,
+                            selectedItem = selectedBed,
+                            onItemSelected = { selectedBed = it },
+                            itemLabel = { it.code }
+                        )
+                    }
+                }
+            }
 
-            DeisaRadioGroup(
-                label = "Status",
-                options = listOf(
-                    "observed" to "Observasi",
-                    "handled" to "Ditangani",
-                    "recovered" to "Sembuh",
-                    "referred" to "Dirujuk"
-                ),
-                selectedOption = status,
-                onOptionSelected = { status = it }
-            )
-
-            // Medicine Selector
-            MedicineSelector(
-                availableMedicines = lookups.medicines,
-                selectedMedicines = selectedMedicines,
-                onChanged = { selectedMedicines = it }
-            )
-
-            OutlinedTextField(
-                value = notes, onValueChange = { notes = it },
-                label = { Text("Catatan") },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 2,
-                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
-            )
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(
-                    checked = notifyGuardian,
-                    onCheckedChange = { notifyGuardian = it },
-                    colors = CheckboxDefaults.colors(checkedColor = Primary, uncheckedColor = MutedText)
+            Text("Obat yang Diberikan", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Primary)
+            
+            DeisaCard {
+                MedicineSelector(
+                    availableMedicines = lookups.medicines,
+                    selectedMedicines = selectedMedicines,
+                    onChanged = { selectedMedicines = it }
                 )
-                Text("Kirim Notifikasi WhatsApp ke Wali", color = OnAppBackground, fontSize = 14.sp)
+            }
+
+            Text("Keterangan & Notifikasi", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Primary)
+            
+            DeisaCard {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedTextField(
+                        value = notes, onValueChange = { notes = it },
+                        label = { Text("Catatan Tambahan") },
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 2,
+                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
+                    )
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = notifyGuardian,
+                            onCheckedChange = { notifyGuardian = it },
+                            colors = CheckboxDefaults.colors(checkedColor = Primary, uncheckedColor = MutedText)
+                        )
+                        Text("Kirim Notifikasi WhatsApp ke Wali", color = OnAppBackground, fontSize = 14.sp)
+                    }
+                }
             }
 
             Spacer(Modifier.height(80.dp))
@@ -201,7 +225,7 @@ fun MedicineSelector(
     var showDialog by remember { mutableStateOf(false) }
 
     Column(Modifier.fillMaxWidth()) {
-        SectionHeader("Obat-obatan", action = {
+        SectionHeader(title = "Obat-obatan", action = {
             TextButton(onClick = { showDialog = true }) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Filled.Add, null, modifier = Modifier.size(16.dp))

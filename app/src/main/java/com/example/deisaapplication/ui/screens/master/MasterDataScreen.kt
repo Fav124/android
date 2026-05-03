@@ -98,11 +98,6 @@ fun MasterDataScreen(
             DeisaTopBar(
                 title = section.title,
                 onOpenDrawer = onOpenDrawer,
-                actions = {
-                    IconButton(onClick = { viewModel.load(section) }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Muat ulang", tint = Primary)
-                    }
-                },
             )
         },
         floatingActionButton = {
@@ -317,6 +312,7 @@ private fun MasterSummary(section: MasterSection, state: MasterDataState) {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ClassCard(
     item: SchoolClassItem,
@@ -485,6 +481,7 @@ private fun ConfirmDeleteButton(onDelete: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ClassFormDialog(
     item: SchoolClassItem?,

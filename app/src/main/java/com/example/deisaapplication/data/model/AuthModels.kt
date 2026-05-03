@@ -6,16 +6,30 @@ data class User(
     val id: Int,
     val name: String,
     val email: String,
+    @SerializedName("no_hp")
+    val noHp: String? = null,
     val role: String,
     @SerializedName("role_label")
     val roleLabel: String,
-    val status: String,
+    @SerializedName("is_approved")
+    val isApproved: Boolean = false,
 ) {
     fun isSuperAdmin() = role == "super_admin"
     fun isAdmin()      = role == "admin" || role == "super_admin"
     fun canManageData() = role in listOf("super_admin", "admin")
     fun canAccessHealth() = role in listOf("super_admin", "admin", "petugas_kesehatan")
 }
+
+data class RegisterRequest(
+    val name: String,
+    val email: String,
+    @SerializedName("no_hp")
+    val noHp: String,
+    val password: String,
+    @SerializedName("password_confirmation")
+    val passwordConfirmation: String,
+    val role: String = "petugas_kesehatan"
+)
 
 data class LoginRequest(val email: String, val password: String)
 

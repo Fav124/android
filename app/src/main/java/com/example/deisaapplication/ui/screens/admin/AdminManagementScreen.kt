@@ -93,13 +93,6 @@ fun AdminManagementScreen(
             DeisaTopBar(
                 title = title,
                 onOpenDrawer = onOpenDrawer,
-                actions = {
-                    IconButton(onClick = {
-                        viewModel.load(status = statusFilter, role = roleFilter, search = search.takeIf { it.isNotBlank() })
-                    }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Muat ulang", tint = Primary)
-                    }
-                },
             )
         },
         containerColor = AppBackground,

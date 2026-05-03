@@ -83,7 +83,7 @@ private fun SicknessCaseDetailContent(
                     Text("NIS: ${case.santri?.nis ?: "-"}", fontSize = 13.sp, color = MutedText)
                     Text("Kelas: ${case.santri?.schoolClass ?: "-"}", fontSize = 13.sp, color = MutedText)
                 }
-                StatusBadge(case.status, case.statusLabel)
+                StatusBadge(case.status, case.statusLabel ?: "Observasi")
             }
         }
 
@@ -117,7 +117,7 @@ private fun SicknessCaseDetailContent(
         // Medical Details
         SectionHeader("Diagnosis & Keluhan")
         DeisaCard {
-            DetailItem(Icons.Filled.Sick, "Keluhan", case.complaint)
+            DetailItem(Icons.Filled.Sick, "Keluhan", case.complaint ?: "-")
             DeisaDivider()
             DetailItem(Icons.Filled.FactCheck, "Diagnosa", case.diagnosis ?: "Belum ada diagnosa")
             DeisaDivider()
@@ -134,7 +134,7 @@ private fun SicknessCaseDetailContent(
             DetailItem(Icons.Filled.Event, "Waktu Masuk", case.visitDate ?: "-")
             if (case.returnDate != null) {
                 DeisaDivider()
-                DetailItem(Icons.Filled.EventAvailable, "Waktu Keluar", case.returnDate)
+                DetailItem(Icons.Filled.EventAvailable, "Waktu Keluar", case.returnDate ?: "-")
             }
         }
 
@@ -164,7 +164,7 @@ private fun SicknessCaseDetailContent(
         if (!case.notes.isNullOrEmpty()) {
             SectionHeader("Catatan")
             DeisaCard {
-                Text(case.notes, fontSize = 14.sp, color = OnAppBackground, lineHeight = 20.sp)
+                Text(case.notes ?: "", fontSize = 14.sp, color = OnAppBackground, lineHeight = 20.sp)
             }
         }
 

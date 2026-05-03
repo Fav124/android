@@ -52,6 +52,10 @@ class HospitalReferralViewModel(private val repo: HospitalReferralRepository) : 
         }
     }
 
+    fun clearSelected() {
+        _selectedReferral.value = null
+    }
+
     fun loadLookups() {
         viewModelScope.launch {
             // We can use the sickness lookups to get santris

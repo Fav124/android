@@ -40,11 +40,6 @@ fun MedicineScreen(
             DeisaTopBar(
                 title = "Inventori Obat",
                 onOpenDrawer = onOpenDrawer,
-                actions = {
-                    IconButton(onClick = { viewModel.loadList() }) {
-                        Icon(Icons.Filled.Refresh, "Refresh", tint = Primary)
-                    }
-                }
             )
         },
         floatingActionButton = {
@@ -69,6 +64,9 @@ fun MedicineScreen(
             contentAlignment = Alignment.TopCenter
         ) {
             Column(Modifier.fillMaxSize()) {
+                if (state.isLoading) {
+                    DeisaLoadingBar()
+                }
                 // Summary strip
                 val meds = state.medicines
                 val kritis  = meds.count { it.status == "stok_kritis" }

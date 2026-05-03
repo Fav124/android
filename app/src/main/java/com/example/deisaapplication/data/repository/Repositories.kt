@@ -21,6 +21,15 @@ class AuthRepository(private val session: SessionManager) {
         }
     }
 
+    suspend fun register(request: RegisterRequest): Result<User> = runCatching {
+        val resp = api.register(request)
+        if (resp.isSuccessful) {
+            resp.body()?.data ?: error("Data kosong dari server.")
+        } else {
+            error(parseError(resp.errorBody()?.string()))
+        }
+    }
+
     suspend fun logout(): Result<Unit> = runCatching {
         api.logout()
         session.clear()

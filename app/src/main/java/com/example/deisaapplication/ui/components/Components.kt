@@ -8,6 +8,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
@@ -180,6 +182,15 @@ fun LoadingBox(modifier: Modifier = Modifier) {
     Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         CircularProgressIndicator(color = Primary, strokeWidth = 3.dp)
     }
+}
+
+@Composable
+fun DeisaLoadingBar(modifier: Modifier = Modifier) {
+    LinearProgressIndicator(
+        modifier = modifier.fillMaxWidth().height(3.dp),
+        color = Primary,
+        trackColor = AppSurfaceVariant.copy(alpha = 0.3f)
+    )
 }
 
 @Composable
@@ -383,9 +394,12 @@ fun DeisaRadioGroup(
 ) {
     Column(modifier.fillMaxWidth()) {
         Text(label, fontSize = 14.sp, color = OnAppBackground, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        Column(Modifier.fillMaxWidth()) {
             options.forEach { (value, text) ->
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { onOptionSelected(value) }) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically, 
+                    modifier = Modifier.fillMaxWidth().clickable { onOptionSelected(value) }.padding(vertical = 4.dp)
+                ) {
                     RadioButton(
                         selected = selectedOption == value,
                         onClick = { onOptionSelected(value) },
@@ -393,6 +407,67 @@ fun DeisaRadioGroup(
                     )
                     Text(text, color = OnAppBackground, fontSize = 14.sp)
                 }
+            }
+        }
+    }
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DeisaDatePicker(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val datePickerState = rememberDatePickerState()
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    val dateStr = if (value.isNotEmpty()) value else "Pilih Tanggal"
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        OutlinedTextField(
+            value = dateStr,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(label) },
+            leadingIcon = { Icon(Icons.Default.CalendarMonth, null, tint = MutedText) },
+            trailingIcon = {
+                IconButton(onClick = { showDatePicker = true }) {
+                    Icon(Icons.Default.DateRange, null, tint = Primary)
+                }
+            },
+            shape = RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Primary,
+                unfocusedBorderColor = AppSurfaceVariant,
+                focusedTextColor = OnAppBackground,
+                unfocusedTextColor = OnAppBackground,
+                focusedLabelColor = Primary,
+                unfocusedLabelColor = MutedText,
+            ),
+            modifier = Modifier.fillMaxWidth().clickable { showDatePicker = true }
+        )
+
+        if (showDatePicker) {
+            DatePickerDialog(
+                onDismissRequest = { showDatePicker = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        datePickerState.selectedDateMillis?.let {
+                            val date = java.time.Instant.ofEpochMilli(it)
+                                .atZone(java.time.ZoneId.of("UTC"))
+                                .toLocalDate()
+                            onValueChange(date.toString())
+                        }
+                        showDatePicker = false
+                    }) { Text("Pilih", color = Primary) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDatePicker = false }) { Text("Batal", color = MutedText) }
+                },
+                colors = DatePickerDefaults.colors(containerColor = AppSurface)
+            ) {
+                DatePicker(state = datePickerState)
             }
         }
     }

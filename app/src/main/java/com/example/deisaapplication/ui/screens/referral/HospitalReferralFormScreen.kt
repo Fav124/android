@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.deisaapplication.data.model.ReferralRequest
@@ -49,15 +50,17 @@ fun HospitalReferralFormScreen(
         viewModel.loadLookups()
         if (id != null) {
             viewModel.loadDetail(id)
+        } else {
+            viewModel.clearSelected()
         }
     }
 
     LaunchedEffect(referral) {
         referral?.let { r ->
             selectedSantri = r.santri
-            hospitalName = r.hospitalName
+            hospitalName = r.hospitalName ?: ""
             referralDate = r.referralDate ?: LocalDate.now().toString()
-            complaint = r.complaint
+            complaint = r.complaint ?: ""
             diagnosis = r.diagnosis ?: ""
             transport = r.transport ?: "Ambulans Pondok"
             companionName = r.companionName ?: ""
@@ -103,82 +106,106 @@ fun HospitalReferralFormScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            DeisaSearchableDropdown(
-                label = "Santri",
-                items = lookups.santris,
-                selectedItem = selectedSantri,
-                onItemSelected = { selectedSantri = it },
-                itemLabel = { "${it.name} (${it.nis ?: "-"})" }
-            )
+            Text("Informasi Santri & RS", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Primary)
+            
+            DeisaCard {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    DeisaSearchableDropdown(
+                        label = "Santri",
+                        items = lookups.santris,
+                        selectedItem = selectedSantri,
+                        onItemSelected = { selectedSantri = it },
+                        itemLabel = { "${it.name} (${it.nis ?: "-"})" }
+                    )
 
-            OutlinedTextField(
-                value = hospitalName, onValueChange = { hospitalName = it },
-                label = { Text("Nama Rumah Sakit / Klinik") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
-            )
+                    OutlinedTextField(
+                        value = hospitalName, onValueChange = { hospitalName = it },
+                        label = { Text("Nama Rumah Sakit / Klinik") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
+                    )
 
-            OutlinedTextField(
-                value = referralDate, onValueChange = { referralDate = it },
-                label = { Text("Tanggal Rujukan (YYYY-MM-DD)") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
-            )
+                    OutlinedTextField(
+                        value = referralDate, onValueChange = { referralDate = it },
+                        label = { Text("Tanggal Rujukan (YYYY-MM-DD)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
+                    )
+                }
+            }
 
-            OutlinedTextField(
-                value = complaint, onValueChange = { complaint = it },
-                label = { Text("Alasan Rujukan / Keluhan") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
-            )
+            Text("Alasan & Diagnosa", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Primary)
+            
+            DeisaCard {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedTextField(
+                        value = complaint, onValueChange = { complaint = it },
+                        label = { Text("Alasan Rujukan / Keluhan") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
+                    )
 
-            OutlinedTextField(
-                value = diagnosis, onValueChange = { diagnosis = it },
-                label = { Text("Diagnosa (Jika ada)") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
-            )
+                    OutlinedTextField(
+                        value = diagnosis, onValueChange = { diagnosis = it },
+                        label = { Text("Diagnosa (Jika ada)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
+                    )
+                }
+            }
 
-            OutlinedTextField(
-                value = transport, onValueChange = { transport = it },
-                label = { Text("Kendaraan / Transportasi") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
-            )
+            Text("Logistik & Pendamping", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Primary)
+            
+            DeisaCard {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedTextField(
+                        value = transport, onValueChange = { transport = it },
+                        label = { Text("Kendaraan / Transportasi") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
+                    )
 
-            OutlinedTextField(
-                value = companionName, onValueChange = { companionName = it },
-                label = { Text("Nama Pendamping") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
-            )
+                    OutlinedTextField(
+                        value = companionName, onValueChange = { companionName = it },
+                        label = { Text("Nama Pendamping") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
+                    )
+                    
+                    DeisaRadioGroup(
+                        label = "Status Rujukan",
+                        options = listOf(
+                            "referred" to "Dirujuk",
+                            "returned" to "Sudah Kembali",
+                            "treated" to "Dalam Perawatan"
+                        ),
+                        selectedOption = status,
+                        onOptionSelected = { status = it }
+                    )
+                }
+            }
 
-            DeisaRadioGroup(
-                label = "Status",
-                options = listOf(
-                    "referred" to "Dirujuk",
-                    "returned" to "Sudah Kembali",
-                    "treated" to "Dalam Perawatan"
-                ),
-                selectedOption = status,
-                onOptionSelected = { status = it }
-            )
+            Text("Keterangan & Notifikasi", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Primary)
+            
+            DeisaCard {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedTextField(
+                        value = notes, onValueChange = { notes = it },
+                        label = { Text("Catatan Tambahan") },
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 2,
+                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
+                    )
 
-            OutlinedTextField(
-                value = notes, onValueChange = { notes = it },
-                label = { Text("Catatan Tambahan") },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 2,
-                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
-            )
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(
-                    checked = notifyGuardian,
-                    onCheckedChange = { notifyGuardian = it },
-                    colors = CheckboxDefaults.colors(checkedColor = Primary, uncheckedColor = MutedText)
-                )
-                Text("Kirim Notifikasi WhatsApp ke Wali", color = OnAppBackground, fontSize = 14.sp)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = notifyGuardian,
+                            onCheckedChange = { notifyGuardian = it },
+                            colors = CheckboxDefaults.colors(checkedColor = Primary, uncheckedColor = MutedText)
+                        )
+                        Text("Kirim Notifikasi WhatsApp ke Wali", color = OnAppBackground, fontSize = 14.sp)
+                    }
+                }
             }
 
             Spacer(Modifier.height(80.dp))

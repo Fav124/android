@@ -33,6 +33,7 @@ import java.util.*
 @Composable
 fun DashboardScreen(
     viewModel: DashboardViewModel,
+    userName: String,
     onOpenDrawer: () -> Unit,
     onNavigateSicknessCase: () -> Unit,
     onNavigateMedicine: () -> Unit,
@@ -44,29 +45,31 @@ fun DashboardScreen(
             DeisaTopBar(
                 title = "DEIHealth",
                 onOpenDrawer = onOpenDrawer,
-                actions = {
-                    IconButton(onClick = { viewModel.load() }) {
-                        Icon(Icons.Filled.Refresh, "Refresh", tint = Primary)
-                    }
-                }
             )
         },
         containerColor = AppBackground,
     ) { paddingValues ->
-        PullToRefreshBox(
-            isRefreshing = uiState is DashboardUiState.Loading,
-            onRefresh = { viewModel.load() },
-            modifier = Modifier.fillMaxSize().padding(paddingValues)
-        ) {
-            when (val state = uiState) {
-                is DashboardUiState.Loading -> LoadingBox()
-                is DashboardUiState.Error   -> ErrorBox(state.message, { viewModel.load() })
-                is DashboardUiState.Success -> DashboardContent(
-                    data = state.data,
-                    onNavigateSicknessCase = onNavigateSicknessCase,
-                    onNavigateMedicine = onNavigateMedicine,
-                    onNavigateReferral = onNavigateReferral,
-                )
+        Column(Modifier.fillMaxSize().padding(paddingValues)) {
+            if (uiState is DashboardUiState.Loading) {
+                DeisaLoadingBar()
+            }
+            
+            PullToRefreshBox(
+                isRefreshing = uiState is DashboardUiState.Loading,
+                onRefresh = { viewModel.load() },
+                modifier = Modifier.fillMaxSize()
+            ) {
+                when (val state = uiState) {
+                    is DashboardUiState.Loading -> LoadingBox()
+                    is DashboardUiState.Error   -> ErrorBox(state.message, { viewModel.load() })
+                    is DashboardUiState.Success -> DashboardContent(
+                        data = state.data,
+                        userName = userName,
+                        onNavigateSicknessCase = onNavigateSicknessCase,
+                        onNavigateMedicine = onNavigateMedicine,
+                        onNavigateReferral = onNavigateReferral,
+                    )
+                }
             }
         }
     }
@@ -75,6 +78,7 @@ fun DashboardScreen(
 @Composable
 private fun DashboardContent(
     data: DashboardData,
+    userName: String,
     onNavigateSicknessCase: () -> Unit,
     onNavigateMedicine: () -> Unit,
     onNavigateReferral: () -> Unit,
@@ -89,7 +93,7 @@ private fun DashboardContent(
     ) {
         item {
             Column(Modifier.padding(top = 8.dp)) {
-                Text("Halo, Pengurus!", fontWeight = FontWeight.ExtraBold, fontSize = 24.sp, color = OnAppBackground)
+                Text("Halo, $userName!", fontWeight = FontWeight.ExtraBold, fontSize = 24.sp, color = OnAppBackground)
                 Text(currentDate, fontSize = 14.sp, color = MutedText)
             }
         }
@@ -209,12 +213,12 @@ private fun RecentCaseItem(case: SicknessCase, onClick: () -> Unit) {
             Column(Modifier.weight(1f)) {
                 Text(case.santri?.name ?: "Tanpa Nama", fontWeight = FontWeight.Bold, color = OnAppBackground, fontSize = 15.sp)
                 Text(
-                    case.complaint.take(35) + if (case.complaint.length > 35) "…" else "",
+                    (case.complaint ?: "").take(35) + if ((case.complaint?.length ?: 0) > 35) "…" else "",
                     fontSize = 12.sp, color = MutedText,
                 )
             }
             Column(horizontalAlignment = Alignment.End) {
-                StatusBadge(case.status, case.statusLabel)
+                StatusBadge(case.status, case.statusLabel ?: "Observasi")
                 Spacer(Modifier.height(4.dp))
                 Text(case.visitDate ?: "", fontSize = 10.sp, color = MutedText)
             }

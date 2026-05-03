@@ -56,11 +56,6 @@ fun SicknessCaseScreen(
             DeisaTopBar(
                 title = "Santri Sakit",
                 onOpenDrawer = onOpenDrawer,
-                actions = {
-                    IconButton(onClick = { viewModel.loadList(selectedStatus, search.takeIf { it.isNotBlank() }) }) {
-                        Icon(Icons.Filled.Refresh, "Refresh", tint = Primary)
-                    }
-                }
             )
         },
         floatingActionButton = {
@@ -187,10 +182,10 @@ fun SicknessCaseItem(
             Column(Modifier.weight(1f)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(case.santri?.name ?: "—", fontWeight = FontWeight.SemiBold, color = OnAppBackground, fontSize = 14.sp)
-                    StatusBadge(case.status, case.statusLabel)
+                    StatusBadge(case.status, case.statusLabel ?: "Observasi")
                 }
                 Spacer(Modifier.height(4.dp))
-                Text(case.complaint.take(60), fontSize = 12.sp, color = MutedText)
+                Text(case.complaint?.take(60) ?: "Keluhan tidak ada", fontSize = 12.sp, color = MutedText)
                 if (case.diagnosis != null) {
                     Text("Diagnosa: ${case.diagnosis}", fontSize = 12.sp, color = MutedText)
                 }

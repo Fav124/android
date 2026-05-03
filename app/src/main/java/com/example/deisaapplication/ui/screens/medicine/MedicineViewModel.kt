@@ -46,6 +46,10 @@ class MedicineViewModel(private val repo: MedicineRepository) : ViewModel() {
         }
     }
 
+    fun clearSelected() {
+        _selectedMedicine.value = null
+    }
+
     fun save(id: Int?, data: Map<String, Any?>, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)

@@ -61,6 +61,10 @@ class SantriViewModel : ViewModel() {
         }
     }
 
+    fun clearSelected() {
+        _selectedSantri.value = null
+    }
+
     fun loadLookups() {
         viewModelScope.launch {
             try {

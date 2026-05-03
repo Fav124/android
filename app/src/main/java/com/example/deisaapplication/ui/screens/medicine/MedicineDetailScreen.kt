@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import com.example.deisaapplication.data.model.Medicine
 import com.example.deisaapplication.ui.components.*
 import com.example.deisaapplication.ui.screens.santri.DetailItem
@@ -64,9 +65,18 @@ private fun MedicineDetailContent(medicine: Medicine, modifier: Modifier = Modif
         // Name & Status
         DeisaCard {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Column {
+                Column(Modifier.weight(1f)) {
                     Text(medicine.name, fontWeight = FontWeight.Bold, fontSize = 20.sp, color = OnAppBackground)
-                    Text("Unit: ${medicine.unit}", fontSize = 14.sp, color = MutedText)
+                    Text("Kode: ${medicine.code}", fontSize = 13.sp, color = MutedText)
+                    Spacer(Modifier.height(4.dp))
+                    Surface(shape = RoundedCornerShape(8.dp), color = AppSurfaceVariant.copy(alpha = 0.5f)) {
+                        Text(
+                            "${medicine.kategori} • ${medicine.formulation}", 
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                            fontSize = 11.sp, 
+                            color = OnAppBackground
+                        )
+                    }
                 }
                 StatusBadge(medicine.status, when (medicine.status) {
                     "aman"              -> "Aman"
@@ -79,11 +89,13 @@ private fun MedicineDetailContent(medicine: Medicine, modifier: Modifier = Modif
         }
 
         // Stock Info
-        SectionHeader("Informasi Stok")
+        SectionHeader("Informasi Stok & Lokasi")
         DeisaCard {
             DetailItem(Icons.Filled.Inventory, "Stok Saat Ini", "${medicine.stock} ${medicine.unit}")
             DeisaDivider()
             DetailItem(Icons.Filled.ReportProblem, "Stok Minimum", "${medicine.minimumStock} ${medicine.unit}")
+            DeisaDivider()
+            DetailItem(Icons.Filled.LocationOn, "Lokasi Penyimpanan", medicine.location ?: "Tidak ditentukan")
             DeisaDivider()
             DetailItem(Icons.Filled.Event, "Tanggal Kadaluarsa", medicine.expiryDate ?: "-")
         }
@@ -92,7 +104,7 @@ private fun MedicineDetailContent(medicine: Medicine, modifier: Modifier = Modif
         if (!medicine.description.isNullOrEmpty()) {
             SectionHeader("Deskripsi / Catatan")
             DeisaCard {
-                Text(medicine.description, fontSize = 14.sp, color = OnAppBackground)
+                Text(medicine.description ?: "", fontSize = 14.sp, color = OnAppBackground, lineHeight = 20.sp)
             }
         }
 
