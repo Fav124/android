@@ -78,6 +78,8 @@ class MedicineRepository {
     suspend fun update(id: Int, body: Map<String, Any?>) = runCatching { api.updateMedicine(id, body) }
 
     suspend fun delete(id: Int) = runCatching { api.deleteMedicine(id) }
+
+    suspend fun recordMutation(body: Map<String, Any?>) = runCatching { api.recordStockMutation(body) }
 }
 
 class HospitalReferralRepository {

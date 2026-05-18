@@ -3,11 +3,15 @@ package com.example.deisaapplication.ui.screens.santri
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.draw.clip
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -29,6 +33,7 @@ import com.example.deisaapplication.ui.theme.*
 fun SantriDetailScreen(
     id: Int,
     viewModel: SantriViewModel,
+    canManageData: Boolean,
     onBack: () -> Unit,
     onEdit: (Int) -> Unit,
 ) {
@@ -44,8 +49,10 @@ fun SantriDetailScreen(
                 title = "Detail Santri",
                 onBack = onBack,
                 actions = {
-                    IconButton(onClick = { onEdit(id) }) {
-                        Icon(Icons.Filled.Edit, "Ubah", tint = Primary)
+                    if (canManageData) {
+                        IconButton(onClick = { onEdit(id) }) {
+                            Icon(Icons.Filled.Edit, "Ubah", tint = Primary)
+                        }
                     }
                 }
             )
@@ -60,10 +67,17 @@ fun SantriDetailScreen(
     }
 }
 
+private enum class DetailTab(val label: String, val icon: ImageVector) {
+    PRIBADI("Pribadi", Icons.Filled.Person),
+    AKADEMIK("Akademik", Icons.Filled.School),
+    KESEHATAN("Kesehatan", Icons.Filled.MedicalServices)
+}
+
 @Composable
 private fun SantriDetailContent(santri: Santri, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    
+    var activeTab by remember { mutableStateOf(DetailTab.PRIBADI) }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -87,8 +101,9 @@ private fun SantriDetailContent(santri: Santri, modifier: Modifier = Modifier) {
                 }
                 Spacer(Modifier.width(20.dp))
                 Column {
-                    Text(santri.name, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp, color = OnAppBackground)
-                    Text("NIS: ${santri.nis ?: "-"}", color = MutedText, fontSize = 14.sp)
+                    Text(santri.name, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp, color = OnAppBackground)
+                    Text("NIS: ${santri.nis ?: "-"}", color = MutedText, fontSize = 13.sp)
+                    Spacer(Modifier.height(4.dp))
                     Surface(shape = RoundedCornerShape(8.dp), color = AppSurfaceVariant.copy(0.5f)) {
                         Text(santri.genderLabel, modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp), fontSize = 11.sp, color = MutedText)
                     }
@@ -96,95 +111,163 @@ private fun SantriDetailContent(santri: Santri, modifier: Modifier = Modifier) {
             }
         }
 
-        // Academic Info
-        SectionHeader("Informasi Akademik")
-        DeisaCard {
-            DetailItem(Icons.Filled.School, "Kelas", santri.schoolClass ?: "-")
-            DeisaDivider()
-            DetailItem(Icons.Filled.Category, "Jurusan", santri.major ?: "-")
-            DeisaDivider()
-            DetailItem(Icons.Filled.Home, "Asrama", santri.dormitory ?: "-")
-            DeisaDivider()
-            DetailItem(Icons.Filled.MeetingRoom, "Kamar", santri.dormRoom ?: "-")
+        // Pill Navigation Bar
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(AppSurfaceVariant.copy(alpha = 0.5f))
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            DetailTab.values().forEach { tab ->
+                val selected = activeTab == tab
+                val bg by animateColorAsState(
+                    targetValue = if (selected) Primary else Color.Transparent,
+                    animationSpec = tween(durationMillis = 300)
+                )
+                val contentColor by animateColorAsState(
+                    targetValue = if (selected) Color.White else MutedText,
+                    animationSpec = tween(durationMillis = 300)
+                )
+
+                Row(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(40.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(bg)
+                        .clickable { activeTab = tab },
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = tab.icon,
+                        contentDescription = null,
+                        tint = contentColor,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = tab.label,
+                        color = contentColor,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
         }
 
-        // Guardian Info
-        SectionHeader("Data Wali Santri")
-        DeisaCard {
-            DetailItem(Icons.Filled.Person, "Nama Wali", santri.guardianName ?: "-")
-            DeisaDivider()
-            DetailItem(Icons.Filled.FamilyRestroom, "Hubungan", santri.guardianRelationship ?: "-")
-            DeisaDivider()
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                Column(Modifier.weight(1f)) {
-                    DetailItem(Icons.Filled.Phone, "No. WhatsApp", santri.guardianPhone ?: "-")
+        // Tab Content
+        when (activeTab) {
+            DetailTab.PRIBADI -> {
+                // Section 1: Profil Dasar
+                SectionHeader("Profil Dasar")
+                DeisaCard {
+                    DetailItem(Icons.Filled.LocationOn, "Tempat Lahir", santri.birthPlace ?: "-")
+                    DeisaDivider()
+                    DetailItem(Icons.Filled.CalendarMonth, "Tanggal Lahir", santri.birthDate ?: "-")
+                    DeisaDivider()
+                    DetailItem(Icons.Filled.Wc, "Jenis Kelamin", santri.genderLabel)
                 }
-                if (!santri.guardianPhone.isNullOrBlank()) {
-                    IconButton(
-                        onClick = {
-                            val phone = santri.guardianPhone.replace("[^0-9]".toRegex(), "")
-                            val finalPhone = if (phone.startsWith("0")) "62" + phone.substring(1) else phone
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://api.whatsapp.com/send?phone=$finalPhone"))
-                            context.startActivity(intent)
-                        },
-                        modifier = Modifier.background(Color(0xFF25D366), CircleShape).size(36.dp)
-                    ) {
-                        Icon(Icons.Filled.Message, null, tint = Color.White, modifier = Modifier.size(18.dp))
+
+                // Section 2: Kontak Wali
+                SectionHeader("Data Wali Santri")
+                DeisaCard {
+                    DetailItem(Icons.Filled.Person, "Nama Wali", santri.guardianName ?: "-")
+                    DeisaDivider()
+                    DetailItem(Icons.Filled.FamilyRestroom, "Hubungan", santri.guardianRelationship ?: "-")
+                    DeisaDivider()
+                    DetailItem(Icons.Filled.Work, "Pekerjaan Wali", santri.guardianJob ?: "-")
+                    DeisaDivider()
+                    DetailItem(Icons.Filled.Map, "Alamat Wali", santri.guardianAddress ?: "-")
+                    DeisaDivider()
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                        Column(Modifier.weight(1f)) {
+                            DetailItem(Icons.Filled.Phone, "No. WhatsApp", santri.guardianPhone ?: "-")
+                        }
+                        if (!santri.guardianPhone.isNullOrBlank()) {
+                            IconButton(
+                                onClick = {
+                                    val phone = santri.guardianPhone.replace("[^0-9]".toRegex(), "")
+                                    val finalPhone = if (phone.startsWith("0")) "62" + phone.substring(1) else phone
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://api.whatsapp.com/send?phone=$finalPhone"))
+                                    context.startActivity(intent)
+                                },
+                                modifier = Modifier.background(Color(0xFF25D366), CircleShape).size(36.dp)
+                            ) {
+                                Icon(Icons.Filled.Message, null, tint = Color.White, modifier = Modifier.size(18.dp))
+                            }
+                        }
                     }
                 }
             }
-        }
 
-        // Health Info (NEW Section)
-        SectionHeader("Informasi Kesehatan Lengkap")
-        DeisaCard {
-            Row(Modifier.fillMaxWidth()) {
-                Column(Modifier.weight(1f)) {
-                    DetailItem(Icons.Filled.Bloodtype, "Gol. Darah", santri.bloodType ?: "-")
-                }
-                Column(Modifier.weight(1f)) {
-                    DetailItem(Icons.Filled.MonitorWeight, "BB / TB", "${santri.weight ?: "-"} kg / ${santri.height ?: "-"} cm")
+            DetailTab.AKADEMIK -> {
+                SectionHeader("Informasi Akademik & Kelas")
+                DeisaCard {
+                    DetailItem(Icons.Filled.School, "Kelas", santri.schoolClass ?: "-")
+                    DeisaDivider()
+                    DetailItem(Icons.Filled.Category, "Jurusan", santri.major ?: "-")
+                    DeisaDivider()
+                    DetailItem(Icons.Filled.Home, "Asrama", santri.dormitory ?: "-")
+                    DeisaDivider()
+                    DetailItem(Icons.Filled.MeetingRoom, "Kamar", santri.dormRoom ?: "-")
                 }
             }
-            DeisaDivider()
-            DetailItem(Icons.Filled.Speed, "Tekanan Darah", santri.bloodPressure ?: "-")
-            DeisaDivider()
-            DetailItem(Icons.Filled.ReportProblem, "Alergi", santri.allergies ?: "Tidak ada alergi.")
-            DeisaDivider()
-            DetailItem(Icons.Filled.History, "Riwayat Penyakit", santri.medicalHistory ?: "-")
-            DeisaDivider()
-            DetailItem(Icons.Filled.Sick, "Kondisi Khusus", santri.specialCondition ?: "-")
-            DeisaDivider()
-            DetailItem(Icons.Filled.Notes, "Catatan Tambahan", santri.notes ?: "-")
-        }
 
-        // Sickness History
-        if (!santri.recentSickness.isNullOrEmpty()) {
-            SectionHeader("Riwayat Kunjungan UKS")
-            santri.recentSickness.forEach { sick ->
-                DeisaCard(Modifier.padding(vertical = 4.dp)) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                        Column {
-                            Text(sick.complaint, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = OnAppBackground)
-                            Text(sick.visitDate ?: "-", fontSize = 12.sp, color = MutedText)
+            DetailTab.KESEHATAN -> {
+                SectionHeader("Informasi Kesehatan Lengkap")
+                DeisaCard {
+                    Row(Modifier.fillMaxWidth()) {
+                        Column(Modifier.weight(1f)) {
+                            DetailItem(Icons.Filled.Bloodtype, "Gol. Darah", santri.bloodType ?: "-")
                         }
-                        StatusBadge(sick.status, sick.status.replaceFirstChar { it.uppercase() })
+                        Column(Modifier.weight(1f)) {
+                            DetailItem(Icons.Filled.MonitorWeight, "BB / TB", "${santri.weight ?: "-"} kg / ${santri.height ?: "-"} cm")
+                        }
+                    }
+                    DeisaDivider()
+                    DetailItem(Icons.Filled.Speed, "Tekanan Darah", santri.bloodPressure ?: "-")
+                    DeisaDivider()
+                    DetailItem(Icons.Filled.ReportProblem, "Alergi", santri.allergies ?: "Tidak ada alergi.")
+                    DeisaDivider()
+                    DetailItem(Icons.Filled.History, "Riwayat Penyakit", santri.medicalHistory ?: "-")
+                    DeisaDivider()
+                    DetailItem(Icons.Filled.Sick, "Kondisi Khusus", santri.specialCondition ?: "-")
+                    DeisaDivider()
+                    DetailItem(Icons.Filled.Notes, "Catatan Tambahan", santri.notes ?: "-")
+                }
+
+                // Sickness History
+                if (!santri.recentSickness.isNullOrEmpty()) {
+                    SectionHeader("Riwayat Kunjungan UKS")
+                    santri.recentSickness.forEach { sick ->
+                        DeisaCard(Modifier.padding(vertical = 4.dp)) {
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                Column {
+                                    Text(sick.complaint, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = OnAppBackground)
+                                    Text(sick.visitDate ?: "-", fontSize = 12.sp, color = MutedText)
+                                }
+                                StatusBadge(sick.status, sick.status.replaceFirstChar { it.uppercase() })
+                            }
+                        }
                     }
                 }
-            }
-        }
 
-        // Referral History
-        if (!santri.recentReferrals.isNullOrEmpty()) {
-            SectionHeader("Riwayat Rujukan Rumah Sakit")
-            santri.recentReferrals.forEach { ref ->
-                DeisaCard(Modifier.padding(vertical = 4.dp)) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                        Column {
-                            Text(ref.hospitalName, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = OnAppBackground)
-                            Text(ref.referralDate ?: "-", fontSize = 12.sp, color = MutedText)
+                // Referral History
+                if (!santri.recentReferrals.isNullOrEmpty()) {
+                    SectionHeader("Riwayat Rujukan Rumah Sakit")
+                    santri.recentReferrals.forEach { ref ->
+                        DeisaCard(Modifier.padding(vertical = 4.dp)) {
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                Column {
+                                    Text(ref.hospitalName, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = OnAppBackground)
+                                    Text(ref.referralDate ?: "-", fontSize = 12.sp, color = MutedText)
+                                }
+                                StatusBadge(ref.status, ref.status.replaceFirstChar { it.uppercase() })
+                            }
                         }
-                        StatusBadge(ref.status, ref.status.replaceFirstChar { it.uppercase() })
                     }
                 }
             }

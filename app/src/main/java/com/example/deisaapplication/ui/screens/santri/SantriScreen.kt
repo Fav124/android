@@ -1,11 +1,13 @@
 package com.example.deisaapplication.ui.screens.santri
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -158,58 +160,149 @@ fun SantriScreen(
 }
 
 @Composable
-private fun SantriItem(santri: Santri, canManageData: Boolean, onClick: (Int) -> Unit, onDelete: () -> Unit) {
+private fun SantriItem(
+    santri: Santri, 
+    canManageData: Boolean, 
+    onClick: (Int) -> Unit, 
+    onDelete: () -> Unit
+) {
     var showDeleteDialog by remember { mutableStateOf(false) }
+    val genderColor = if (santri.gender == "L") LightBlue else Color(0xFFE91E63)
+    val genderBg = genderColor.copy(alpha = 0.08f)
 
-    DeisaCard(modifier = Modifier.clickable { onClick(santri.id) }) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick(santri.id) },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = AppSurface),
+        border = androidx.compose.foundation.BorderStroke(1.dp, AppSurfaceVariant.copy(alpha = 0.5f))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Letter avatar with gorgeous frame
             Box(
-                Modifier.size(42.dp).background(if(santri.gender == "L") Color(0xFF0090E7).copy(alpha=0.15f) else Color(0xFFFC424A).copy(alpha=0.15f), CircleShape),
-                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(52.dp)
+                    .background(genderBg, CircleShape)
+                    .border(2.dp, genderColor.copy(alpha = 0.3f), CircleShape),
+                contentAlignment = Alignment.Center
             ) {
                 Text(
-                    (santri.name.take(1)).uppercase(),
-                    fontWeight = FontWeight.Bold, 
-                    color = if(santri.gender == "L") Color(0xFF0090E7) else Color(0xFFFC424A), 
-                    fontSize = 16.sp,
+                    text = santri.name.take(1).uppercase(),
+                    fontWeight = FontWeight.ExtraBold,
+                    color = genderColor,
+                    fontSize = 20.sp
                 )
             }
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                Text(santri.name, fontWeight = FontWeight.SemiBold, color = OnAppBackground, fontSize = 14.sp)
-                Spacer(Modifier.height(4.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Filled.School, null, tint = MutedText, modifier = Modifier.size(12.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text(santri.schoolClass ?: "-", fontSize = 12.sp, color = MutedText)
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Filled.Home, null, tint = MutedText, modifier = Modifier.size(12.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text(santri.dormitory ?: "-", fontSize = 12.sp, color = MutedText)
-                    }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                // Name
+                Text(
+                    text = santri.name,
+                    fontWeight = FontWeight.Bold,
+                    color = OnAppBackground,
+                    fontSize = 16.sp
+                )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                // NIS Tag if exists
+                if (!santri.nis.isNullOrBlank()) {
+                    Text(
+                        text = "NIS: ${santri.nis}",
+                        color = MutedText,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
                 }
-            }
-            if (canManageData) {
-                IconButton(onClick = { showDeleteDialog = true }) {
-                    Icon(Icons.Filled.DeleteOutline, "Hapus", tint = AppError)
+
+                // Badges Row
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Class Badge
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = Primary.copy(alpha = 0.08f)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.School,
+                                contentDescription = null,
+                                tint = Primary,
+                                modifier = Modifier.size(12.dp)
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                text = santri.schoolClass ?: "-",
+                                fontSize = 11.sp,
+                                color = Primary,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+
+                    // Dormitory Badge
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = Secondary.copy(alpha = 0.08f)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Home,
+                                contentDescription = null,
+                                tint = Secondary,
+                                modifier = Modifier.size(12.dp)
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                text = santri.dormitory ?: "-",
+                                fontSize = 11.sp,
+                                color = Secondary,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
                 }
             }
         }
     }
-
+    
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
             containerColor = AppSurface,
-            title = { Text("Hapus Data Santri", color = OnAppBackground) },
-            text = { Text("Hapus data '${santri.name}'?", color = MutedText) },
+            title = { Text("Hapus Data Santri", color = OnAppBackground, fontWeight = FontWeight.Bold) },
+            text = { Text("Apakah Anda yakin ingin menghapus data '${santri.name}'?", color = MutedText) },
             confirmButton = {
-                TextButton(onClick = { onDelete(); showDeleteDialog = false }) { Text("Hapus", color = AppError) }
+                TextButton(
+                    onClick = { 
+                        onDelete()
+                        showDeleteDialog = false 
+                    }
+                ) { 
+                    Text("Hapus", color = AppError, fontWeight = FontWeight.Bold) 
+                }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) { Text("Batal", color = MutedText) }
+                TextButton(onClick = { showDeleteDialog = false }) { 
+                    Text("Batal", color = MutedText) 
+                }
             }
         )
     }

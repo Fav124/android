@@ -112,6 +112,9 @@ interface ApiService {
     @DELETE("obat/{id}")
     suspend fun deleteMedicine(@Path("id") id: Int): Response<ApiResponse<Unit>>
 
+    @POST("obat/mutasi")
+    suspend fun recordStockMutation(@Body body: Map<String, @JvmSuppressWildcards Any?>): Response<ApiResponse<Unit>>
+
     // ─── Kasur UKS ───────────────────────────────────────────────────────────
 
     @GET("rawat-inap")

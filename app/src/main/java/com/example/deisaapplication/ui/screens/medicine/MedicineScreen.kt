@@ -69,14 +69,14 @@ fun MedicineScreen(
                 }
                 // Summary strip
                 val meds = state.medicines
-                val kritis  = meds.count { it.status == "stok_kritis" }
+                val kritis  = meds.count { it.status == "stok_kritis" || it.status == "stok_menipis" || it.status == "habis" }
                 val expired = meds.count { it.status == "kadaluarsa" }
-                val segera  = meds.count { it.status == "segera_kadaluarsa" }
+                val segera  = meds.count { it.status == "segera_kadaluarsa" || it.status == "hampir_kadaluarsa" }
                 if (kritis > 0 || expired > 0 || segera > 0) {
                     Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         if (expired > 0) SummaryChip("$expired Kadaluarsa", AppError)
-                        if (kritis > 0) SummaryChip("$kritis Stok Kritis", AppWarning)
-                        if (segera > 0) SummaryChip("$segera Segera Exp", AppWarning)
+                        if (kritis > 0) SummaryChip("$kritis Stok Kritis/Menipis", AppWarning)
+                        if (segera > 0) SummaryChip("$segera Segera/Hampir Exp", AppWarning)
                     }
                 }
 
@@ -177,8 +177,11 @@ private fun MedicineItem(med: Medicine, canManageData: Boolean, onClick: () -> U
                 StatusBadge(med.status, when (med.status) {
                     "aman"              -> "Aman"
                     "stok_kritis"       -> "Stok Kritis"
+                    "stok_menipis"      -> "Stok Menipis"
                     "kadaluarsa"        -> "Kadaluarsa"
                     "segera_kadaluarsa" -> "Segera Exp"
+                    "hampir_kadaluarsa"  -> "Hampir Exp"
+                    "habis"             -> "Habis"
                     else                -> med.status
                 })
             }

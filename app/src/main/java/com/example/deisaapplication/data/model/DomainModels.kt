@@ -22,11 +22,35 @@ data class DashboardData(
     @SerializedName("low_stock_medicines") val lowStockMedicines: List<Medicine>,
     @SerializedName("sickness_trends")    val sicknessTrends: List<SicknessTrend>,
     @SerializedName("case_distribution")  val caseDistribution: List<CaseDistribution>,
+    @SerializedName("class_distribution") val classDistribution: List<ClassDistribution> = emptyList(),
+    @SerializedName("major_distribution") val majorDistribution: List<MajorDistribution> = emptyList(),
+    @SerializedName("frequent_medicines") val frequentMedicines: List<FrequentMedicine> = emptyList(),
+    @SerializedName("alert_medicines")    val alertMedicines: List<AlertMedicine> = emptyList(),
     val filter: DateFilter,
 )
 
 data class SicknessTrend(val date: String, val count: Int)
 data class CaseDistribution(val status: String, @SerializedName("status_label") val statusLabel: String, val count: Int)
+data class ClassDistribution(
+    @SerializedName("class_name") val className: String,
+    val count: Int
+)
+data class MajorDistribution(
+    @SerializedName("major_name") val majorName: String,
+    val count: Int
+)
+data class FrequentMedicine(
+    @SerializedName("medicine_name") val medicineName: String,
+    val count: Int
+)
+data class AlertMedicine(
+    val id: Int,
+    val name: String,
+    val status: String,
+    val stock: Int,
+    val unit: String?,
+    @SerializedName("expiry_date") val expiryDate: String?
+)
 data class DateFilter(@SerializedName("start_date") val startDate: String, @SerializedName("end_date") val endDate: String)
 
 // ─── Sickness Case ─────────────────────────────────────────────────────────
@@ -101,10 +125,18 @@ data class SantriRef(val id: Int, val name: String, val nis: String? = null,
 
 // ─── Medicine ──────────────────────────────────────────────────────────────
 
+data class StockHistoryItem(
+    val id: Int = 0,
+    val type: String = "",
+    val amount: Int = 0,
+    val date: String = "",
+    val notes: String? = null,
+)
+
 data class Medicine(
     val id: Int = 0,
     @SerializedName("kode_obat")    val code: String = "",
-    @SerializedName("nama_obat")    val name: String = "",
+    val name: String = "",
     val kategori: String = "",
     @SerializedName("bentuk_sediaan") val formulation: String = "",
     val unit: String = "",
@@ -112,8 +144,9 @@ data class Medicine(
     @SerializedName("minimum_stock") val minimumStock: Int = 0,
     @SerializedName("expiry_date") val expiryDate: String? = null,
     @SerializedName("lokasi_penyimpanan") val location: String? = null,
-    @SerializedName("deskripsi")    val description: String? = null,
+    val description: String? = null,
     val status: String = "aman",
+    @SerializedName("riwayat_stok") val stockHistory: List<StockHistoryItem> = emptyList(),
 )
 
 data class MedicineRef(val id: Int, val name: String, val unit: String? = null,
@@ -208,26 +241,38 @@ data class MedicineLookupRef(val id: Int, val name: String, val unit: String? = 
 
 data class SchoolClassItem(
     val id: Int = 0,
-    val name: String = "",
-    val description: String? = null,
+    @SerializedName("nama_kelas") val name: String = "",
+    @SerializedName("deskripsi") val description: String? = null,
     @SerializedName("major_ids") val majorIds: List<Int> = emptyList(),
     @SerializedName("major_names") val majorNames: List<String> = emptyList(),
+    @SerializedName("santris_list") val santris: List<SantriClassRef> = emptyList(),
+)
+
+data class SantriClassRef(
+    val id: Int = 0,
+    val name: String = "",
+    val nis: String? = null,
+    val gender: String? = null,
+    @SerializedName("gender_label") val genderLabel: String? = null,
+    val major: String? = null,
+    val dormitory: String? = null,
 )
 
 data class MajorItem(
     val id: Int = 0,
-    val name: String = "",
-    val description: String? = null,
+    @SerializedName("nama_jurusan") val name: String = "",
+    @SerializedName("deskripsi") val description: String? = null,
 )
 
 data class DormitoryItem(
     val id: Int = 0,
-    val name: String = "",
+    @SerializedName("nama_kamar") val name: String = "",
     val building: String? = null,
     val gender: String = "L",
     @SerializedName("supervisor_name") val supervisorName: String? = null,
-    val description: String? = null,
+    @SerializedName("catatan") val description: String? = null,
     @SerializedName("santri_count") val santriCount: Int = 0,
+    val santris: List<SantriRef> = emptyList(),
 )
 
 data class ItemsResponse<T>(

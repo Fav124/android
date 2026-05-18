@@ -164,9 +164,17 @@ fun MedicineFormScreen(
                             OutlinedTextField(
                                 value = stock, onValueChange = { stock = it },
                                 label = { Text("Stok") },
+                                enabled = id == null,
                                 modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(12.dp),
-                                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Secondary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Secondary,
+                                    unfocusedBorderColor = AppSurfaceVariant,
+                                    focusedTextColor = OnAppBackground,
+                                    unfocusedTextColor = OnAppBackground,
+                                    disabledTextColor = MutedText,
+                                    disabledBorderColor = AppSurfaceVariant.copy(alpha = 0.5f)
+                                )
                             )
                             OutlinedTextField(
                                 value = minStock, onValueChange = { minStock = it },
@@ -174,6 +182,15 @@ fun MedicineFormScreen(
                                 modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(12.dp),
                                 colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Secondary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
+                            )
+                        }
+                        if (id != null) {
+                            Text(
+                                text = "* Perubahan stok harus melalui fitur Mutasi Stok di halaman detail.",
+                                color = Secondary,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.padding(top = 2.dp)
                             )
                         }
                         OutlinedTextField(

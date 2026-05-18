@@ -57,7 +57,8 @@ class MedicineViewModel(private val repo: MedicineRepository) : ViewModel() {
                 val res = if (id == null) {
                     repo.create(data)
                 } else {
-                    repo.update(id, data)
+                    val filteredData = data.toMutableMap().apply { remove("stok") }
+                    repo.update(id, filteredData)
                 }
                 
                 if (res.isSuccess && res.getOrNull()?.isSuccessful == true) {
@@ -66,6 +67,32 @@ class MedicineViewModel(private val repo: MedicineRepository) : ViewModel() {
                     onResult(true)
                 } else {
                     _state.value = _state.value.copy(isLoading = false, toast = "Gagal: ${res.exceptionOrNull()?.message ?: res.getOrNull()?.message()}")
+                    onResult(false)
+                }
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(isLoading = false, toast = "Error: ${e.message}")
+                onResult(false)
+            }
+        }
+    }
+
+    fun mutateStock(obatId: Int, jenisMutasi: String, jumlah: Int, catatan: String?, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true)
+            try {
+                val body = mapOf(
+                    "obat_id" to obatId,
+                    "jenis_mutasi" to jenisMutasi,
+                    "jumlah" to jumlah,
+                    "catatan" to catatan
+                )
+                val res = repo.recordMutation(body)
+                if (res.isSuccess && res.getOrNull()?.isSuccessful == true) {
+                    _state.value = _state.value.copy(isLoading = false, toast = "Mutasi stok berhasil dicatat")
+                    loadDetail(obatId)
+                    onResult(true)
+                } else {
+                    _state.value = _state.value.copy(isLoading = false, toast = "Gagal mutasi: ${res.exceptionOrNull()?.message ?: res.getOrNull()?.message()}")
                     onResult(false)
                 }
             } catch (e: Exception) {

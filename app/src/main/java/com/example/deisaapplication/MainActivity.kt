@@ -43,9 +43,12 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -218,12 +221,6 @@ fun DeisaApp(session: SessionManager) {
     }
 }
 
-data class BottomTabItem(
-    val route: String,
-    val label: String,
-    val icon: ImageVector,
-)
-
 @Composable
 private fun MainShell(session: SessionManager, onLogout: () -> Unit) {
     val navController = rememberNavController()
@@ -234,32 +231,6 @@ private fun MainShell(session: SessionManager, onLogout: () -> Unit) {
     val isSuperAdmin = session.isSuperAdmin()
     val currentUser = session.getUser()
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-
-    val bottomTabs = remember(currentUser?.role) {
-        val role = currentUser?.role ?: "petugas_kesehatan"
-        when (role) {
-            "super_admin" -> listOf(
-                BottomTabItem(Routes.DASHBOARD, "Dashboard", Icons.Default.Dashboard),
-                BottomTabItem(Routes.SANTRI, "Santri", Icons.Default.People),
-                BottomTabItem(Routes.SICKNESS, "Pelayanan", Icons.Default.MedicalServices),
-                BottomTabItem(Routes.ADMIN_MANAGEMENT, "Pengguna", Icons.Default.VerifiedUser),
-                BottomTabItem(Routes.SETTINGS, "Akun", Icons.Filled.Settings)
-            )
-            "admin" -> listOf(
-                BottomTabItem(Routes.DASHBOARD, "Dashboard", Icons.Default.Dashboard),
-                BottomTabItem(Routes.SANTRI, "Santri", Icons.Default.People),
-                BottomTabItem(Routes.SICKNESS, "Pelayanan", Icons.Default.MedicalServices),
-                BottomTabItem(Routes.SETTINGS, "Akun", Icons.Filled.Settings)
-            )
-            else -> listOf( // petugas_kesehatan
-                BottomTabItem(Routes.DASHBOARD, "Dashboard", Icons.Default.Dashboard),
-                BottomTabItem(Routes.SICKNESS, "Pelayanan", Icons.Default.MedicalServices),
-                BottomTabItem(Routes.SETTINGS, "Akun", Icons.Filled.Settings)
-            )
-        }
-    }
-
-    val showBottomBar = bottomTabs.any { it.route == currentRoute }
 
     val mainItems = listOf(
         DrawerNavItem(Routes.DASHBOARD, "Dashboard", Icons.Default.Dashboard),
@@ -284,6 +255,7 @@ private fun MainShell(session: SessionManager, onLogout: () -> Unit) {
 
     ModalNavigationDrawer(
         drawerState = drawerState,
+        gesturesEnabled = true,
         drawerContent = {
             ModalDrawerSheet(
                 drawerContainerColor = AppSurface,
@@ -323,69 +295,49 @@ private fun MainShell(session: SessionManager, onLogout: () -> Unit) {
                         DrawerSection("Administrasi", adminItems, currentRoute, navController) { scope.launch { drawerState.close() } }
                     }
                     Spacer(Modifier.weight(1f))
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
-                    NavigationDrawerItem(
-                        label = { Text("Keluar Aplikasi") },
-                        selected = false,
-                        onClick = {
-                            scope.launch { drawerState.close() }
-                            session.clear()
-                            onLogout()
-                        },
-                        icon = { Icon(Icons.Default.Logout, contentDescription = null) },
-                        colors = NavigationDrawerItemDefaults.colors(
-                            unselectedContainerColor = AppSurface,
-                            unselectedIconColor = AppError,
-                            unselectedTextColor = AppError,
-                        ),
-                        modifier = Modifier.padding(12.dp),
-                    )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+                    Spacer(Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(AppError.copy(alpha = 0.08f))
+                            .clickable {
+                                scope.launch { drawerState.close() }
+                                session.clear()
+                                onLogout()
+                            },
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Icon(
+                            imageVector = Icons.Default.Logout,
+                            contentDescription = null,
+                            tint = AppError,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text(
+                            text = "Keluar Aplikasi",
+                            color = AppError,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Spacer(Modifier.height(16.dp))
                 }
             }
         },
     ) {
         Scaffold(
             containerColor = AppBackground,
-            bottomBar = {
-                if (showBottomBar) {
-                    NavigationBar(
-                        containerColor = AppSurface,
-                        tonalElevation = 8.dp
-                    ) {
-                        for (tab in bottomTabs) {
-                            val selected = currentRoute == tab.route
-                            NavigationBarItem(
-                                selected = selected,
-                                onClick = {
-                                    if (currentRoute != tab.route) {
-                                        navController.navigate(tab.route) {
-                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                saveState = true
-                                            }
-                                            launchSingleTop = true
-                                            restoreState = true
-                                        }
-                                    }
-                                },
-                                icon = { Icon(tab.icon, contentDescription = tab.label) },
-                                label = { Text(tab.label, fontSize = 11.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal) },
-                                colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = LightBlue,
-                                    selectedTextColor = LightBlue,
-                                    indicatorColor = LightBlue.copy(alpha = 0.1f),
-                                    unselectedIconColor = MutedText,
-                                    unselectedTextColor = MutedText
-                                )
-                            )
-                        }
-                    }
-                }
-            }
         ) { paddingValues ->
             NavHost(
                 navController = navController,
                 startDestination = Routes.DASHBOARD,
-                modifier = Modifier.padding(paddingValues),
+                modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding()),
             ) {
                 composable(Routes.DASHBOARD) {
                     val vm: DashboardViewModel = viewModel(factory = DashboardViewModel.Factory())
@@ -409,31 +361,49 @@ private fun MainShell(session: SessionManager, onLogout: () -> Unit) {
                     )
                 }
                 composable(Routes.CLASS) {
-                    val vm: MasterDataViewModel = viewModel(factory = MasterDataViewModel.Factory())
-                    MasterDataScreen(
-                        section = MasterSection.CLASS,
-                        viewModel = vm,
-                        canManageData = canManageData,
-                        onOpenDrawer = { scope.launch { drawerState.open() } },
-                    )
+                    if (!canManageData) {
+                        LaunchedEffect(Unit) {
+                            navController.popBackStack()
+                        }
+                    } else {
+                        val vm: MasterDataViewModel = viewModel(factory = MasterDataViewModel.Factory())
+                        MasterDataScreen(
+                            section = MasterSection.CLASS,
+                            viewModel = vm,
+                            canManageData = canManageData,
+                            onOpenDrawer = { scope.launch { drawerState.open() } },
+                        )
+                    }
                 }
                 composable(Routes.MAJOR) {
-                    val vm: MasterDataViewModel = viewModel(factory = MasterDataViewModel.Factory())
-                    MasterDataScreen(
-                        section = MasterSection.MAJOR,
-                        viewModel = vm,
-                        canManageData = canManageData,
-                        onOpenDrawer = { scope.launch { drawerState.open() } },
-                    )
+                    if (!canManageData) {
+                        LaunchedEffect(Unit) {
+                            navController.popBackStack()
+                        }
+                    } else {
+                        val vm: MasterDataViewModel = viewModel(factory = MasterDataViewModel.Factory())
+                        MasterDataScreen(
+                            section = MasterSection.MAJOR,
+                            viewModel = vm,
+                            canManageData = canManageData,
+                            onOpenDrawer = { scope.launch { drawerState.open() } },
+                        )
+                    }
                 }
                 composable(Routes.DORMITORY) {
-                    val vm: MasterDataViewModel = viewModel(factory = MasterDataViewModel.Factory())
-                    MasterDataScreen(
-                        section = MasterSection.DORMITORY,
-                        viewModel = vm,
-                        canManageData = canManageData,
-                        onOpenDrawer = { scope.launch { drawerState.open() } },
-                    )
+                    if (!canManageData) {
+                        LaunchedEffect(Unit) {
+                            navController.popBackStack()
+                        }
+                    } else {
+                        val vm: MasterDataViewModel = viewModel(factory = MasterDataViewModel.Factory())
+                        MasterDataScreen(
+                            section = MasterSection.DORMITORY,
+                            viewModel = vm,
+                            canManageData = canManageData,
+                            onOpenDrawer = { scope.launch { drawerState.open() } },
+                        )
+                    }
                 }
                 composable(Routes.SICKNESS) {
                     val vm: SicknessCaseViewModel = viewModel(factory = SicknessCaseViewModel.Factory())
@@ -504,6 +474,7 @@ private fun MainShell(session: SessionManager, onLogout: () -> Unit) {
                     SantriDetailScreen(
                         id = id,
                         viewModel = vm,
+                        canManageData = canManageData,
                         onBack = { navController.popBackStack() },
                         onEdit = { navController.navigate(Routes.withId(Routes.SANTRI_FORM, it)) },
                     )
@@ -551,9 +522,15 @@ private fun MainShell(session: SessionManager, onLogout: () -> Unit) {
                     route = Routes.SANTRI_FORM,
                     arguments = listOf(navArgument("id") { type = NavType.IntType; defaultValue = -1 }),
                 ) { backStackEntry ->
-                    val id = backStackEntry.arguments?.getInt("id").takeIf { it != -1 }
-                    val vm: SantriViewModel = viewModel(factory = SantriViewModel.Factory())
-                    SantriFormScreen(id = id, viewModel = vm, onBack = { navController.popBackStack() })
+                    if (!canManageData) {
+                        LaunchedEffect(Unit) {
+                            navController.popBackStack()
+                        }
+                    } else {
+                        val id = backStackEntry.arguments?.getInt("id").takeIf { it != -1 }
+                        val vm: SantriViewModel = viewModel(factory = SantriViewModel.Factory())
+                        SantriFormScreen(id = id, viewModel = vm, onBack = { navController.popBackStack() })
+                    }
                 }
                 composable(
                     route = Routes.SICKNESS_FORM,
@@ -585,6 +562,67 @@ private fun MainShell(session: SessionManager, onLogout: () -> Unit) {
 }
 
 @Composable
+private fun AnimatedDrawerItem(
+    label: String,
+    icon: ImageVector,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    val containerColor by animateColorAsState(
+        targetValue = if (selected) LightBlue.copy(alpha = 0.12f) else Color.Transparent,
+        animationSpec = tween(durationMillis = 300)
+    )
+    val iconColor by animateColorAsState(
+        targetValue = if (selected) LightBlue else MutedText,
+        animationSpec = tween(durationMillis = 300)
+    )
+    val textColor by animateColorAsState(
+        targetValue = if (selected) OnAppBackground else OnAppBackground.copy(alpha = 0.8f),
+        animationSpec = tween(durationMillis = 300)
+    )
+    val activeBarWidth by animateDpAsState(
+        targetValue = if (selected) 4.dp else 0.dp,
+        animationSpec = tween(durationMillis = 250)
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .height(48.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(containerColor)
+            .clickable(onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .width(activeBarWidth)
+                .fillMaxHeight()
+                .background(LightBlue, RoundedCornerShape(topEnd = 4.dp, bottomEnd = 4.dp))
+        )
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = iconColor,
+            modifier = Modifier.size(20.dp)
+        )
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        Text(
+            text = label,
+            color = textColor,
+            fontSize = 14.sp,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+        )
+    }
+}
+
+@Composable
 private fun DrawerSection(
     title: String,
     items: List<DrawerNavItem>,
@@ -596,15 +634,17 @@ private fun DrawerSection(
     if (visibleItems.isEmpty()) return
 
     Text(
-        text = title,
+        text = title.uppercase(),
         color = MutedText,
-        fontSize = 12.sp,
-        fontWeight = FontWeight.SemiBold,
-        modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+        fontSize = 11.sp,
+        fontWeight = FontWeight.Bold,
+        letterSpacing = 1.1.sp,
+        modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
     )
-    visibleItems.forEach { item ->
-        NavigationDrawerItem(
-            label = { Text(item.label) },
+    for (item in visibleItems) {
+        AnimatedDrawerItem(
+            label = item.label,
+            icon = item.icon,
             selected = currentRoute == item.route,
             onClick = {
                 onNavigate()
@@ -613,18 +653,8 @@ private fun DrawerSection(
                     launchSingleTop = true
                     restoreState = true
                 }
-            },
-            icon = { Icon(item.icon, contentDescription = null) },
-            colors = NavigationDrawerItemDefaults.colors(
-                selectedContainerColor = Primary.copy(alpha = 0.14f),
-                selectedIconColor = Primary,
-                selectedTextColor = OnAppBackground,
-                unselectedContainerColor = AppSurface,
-                unselectedIconColor = MutedText,
-                unselectedTextColor = OnAppBackground,
-            ),
-            modifier = Modifier.padding(horizontal = 12.dp),
+            }
         )
     }
-    DeisaDivider()
+    Spacer(Modifier.height(8.dp))
 }
