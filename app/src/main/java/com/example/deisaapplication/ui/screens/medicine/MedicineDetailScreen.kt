@@ -122,22 +122,33 @@ private fun MedicineDetailContent(
         }
 
         // Stock Info
+        SectionHeader("Informasi Stok & Lokasi")
+        
         Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            SectionHeader("Informasi Stok & Lokasi")
+            // Restok Button
             Button(
-                onClick = onMutateClick,
-                colors = ButtonDefaults.buttonColors(containerColor = Secondary),
-                shape = RoundedCornerShape(8.dp),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                modifier = Modifier.height(32.dp)
+                onClick = { onMutateClick("masuk") },
+                colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.weight(1f).height(40.dp)
             ) {
-                Icon(Icons.Filled.SwapHoriz, null, tint = Color.White, modifier = Modifier.size(14.dp))
-                Spacer(Modifier.width(4.dp))
-                Text("Mutasi Stok", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Icon(Icons.Filled.Add, null, tint = Color.White, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(6.dp))
+                Text("Restok Obat", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+            }
+            // Mutasi Button
+            Button(
+                onClick = { onMutateClick("keluar") },
+                colors = ButtonDefaults.buttonColors(containerColor = Secondary),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.weight(1f).height(40.dp)
+            ) {
+                Icon(Icons.Filled.SwapHoriz, null, tint = Color.White, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(6.dp))
+                Text("Mutasi Lain", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
             }
         }
 
@@ -242,10 +253,11 @@ private fun MedicineDetailContent(
 
 @Composable
 fun MutateStockDialog(
+    initialType: String = "masuk",
     onDismiss: () -> Unit,
     onSubmit: (type: String, amount: Int, notes: String?) -> Unit
 ) {
-    var type by remember { mutableStateOf("masuk") }
+    var type by remember { mutableStateOf(initialType) }
     var amount by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
     
