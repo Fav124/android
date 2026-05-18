@@ -7,6 +7,8 @@ val Primary           = Color(0xFF0090E7) // Deep Blue
 val PrimaryVariant    = Color(0xFF007BCA)
 val Secondary         = Color(0xFFFF8C00) // Vibrant Orange
 val SecondaryVariant  = Color(0xFFE67E00)
+val NavyBlue          = Color(0xFF2D499D)
+val LightBlue         = Color(0xFF0090E7)
 
 // Light Theme Palette
 val AppBackground     = Color(0xFFF8F9FA) // Milk White / Off White

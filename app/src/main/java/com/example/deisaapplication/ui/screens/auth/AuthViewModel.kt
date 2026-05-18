@@ -39,7 +39,7 @@ class AuthViewModel(
         }
     }
 
-    fun register(name: String, email: String, phone: String, pass: String, passConfirm: String) {
+    fun register(name: String, email: String, phone: String, pass: String, passConfirm: String, role: String) {
         if (name.isBlank() || email.isBlank() || phone.isBlank() || pass.isBlank()) {
             _uiState.value = AuthUiState(error = "Semua field harus diisi.")
             return
@@ -50,7 +50,7 @@ class AuthViewModel(
         }
         viewModelScope.launch {
             _uiState.value = AuthUiState(isLoading = true)
-            repo.register(RegisterRequest(name, email, phone, pass, passConfirm))
+            repo.register(RegisterRequest(name, email, phone, pass, passConfirm, role))
                 .onSuccess { 
                     _uiState.value = AuthUiState(
                         isSuccess = true, 

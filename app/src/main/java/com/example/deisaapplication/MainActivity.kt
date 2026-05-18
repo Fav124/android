@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.Medication
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
@@ -36,8 +37,15 @@ import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -98,6 +106,7 @@ import com.example.deisaapplication.ui.theme.DeisaApplicationTheme
 import com.example.deisaapplication.ui.theme.MutedText
 import com.example.deisaapplication.ui.theme.OnAppBackground
 import com.example.deisaapplication.ui.theme.Primary
+import com.example.deisaapplication.ui.theme.LightBlue
 import kotlinx.coroutines.launch
 
 object Routes {
@@ -209,6 +218,12 @@ fun DeisaApp(session: SessionManager) {
     }
 }
 
+data class BottomTabItem(
+    val route: String,
+    val label: String,
+    val icon: ImageVector,
+)
+
 @Composable
 private fun MainShell(session: SessionManager, onLogout: () -> Unit) {
     val navController = rememberNavController()
@@ -219,6 +234,32 @@ private fun MainShell(session: SessionManager, onLogout: () -> Unit) {
     val isSuperAdmin = session.isSuperAdmin()
     val currentUser = session.getUser()
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+
+    val bottomTabs = remember(currentUser?.role) {
+        val role = currentUser?.role ?: "petugas_kesehatan"
+        when (role) {
+            "super_admin" -> listOf(
+                BottomTabItem(Routes.DASHBOARD, "Dashboard", Icons.Default.Dashboard),
+                BottomTabItem(Routes.SANTRI, "Santri", Icons.Default.People),
+                BottomTabItem(Routes.SICKNESS, "Pelayanan", Icons.Default.MedicalServices),
+                BottomTabItem(Routes.ADMIN_MANAGEMENT, "Pengguna", Icons.Default.VerifiedUser),
+                BottomTabItem(Routes.SETTINGS, "Akun", Icons.Filled.Settings)
+            )
+            "admin" -> listOf(
+                BottomTabItem(Routes.DASHBOARD, "Dashboard", Icons.Default.Dashboard),
+                BottomTabItem(Routes.SANTRI, "Santri", Icons.Default.People),
+                BottomTabItem(Routes.SICKNESS, "Pelayanan", Icons.Default.MedicalServices),
+                BottomTabItem(Routes.SETTINGS, "Akun", Icons.Filled.Settings)
+            )
+            else -> listOf( // petugas_kesehatan
+                BottomTabItem(Routes.DASHBOARD, "Dashboard", Icons.Default.Dashboard),
+                BottomTabItem(Routes.SICKNESS, "Pelayanan", Icons.Default.MedicalServices),
+                BottomTabItem(Routes.SETTINGS, "Akun", Icons.Filled.Settings)
+            )
+        }
+    }
+
+    val showBottomBar = bottomTabs.any { it.route == currentRoute }
 
     val mainItems = listOf(
         DrawerNavItem(Routes.DASHBOARD, "Dashboard", Icons.Default.Dashboard),
@@ -238,7 +279,7 @@ private fun MainShell(session: SessionManager, onLogout: () -> Unit) {
     )
     val adminItems = listOf(
         DrawerNavItem(Routes.ADMIN_MANAGEMENT, "Manajemen User", Icons.Default.AdminPanelSettings, visible = isSuperAdmin),
-        DrawerNavItem(Routes.SETTINGS, "Pengaturan", Icons.Default.Settings),
+        DrawerNavItem(Routes.SETTINGS, "Pengaturan", Icons.Filled.Settings),
     )
 
     ModalNavigationDrawer(
@@ -303,7 +344,44 @@ private fun MainShell(session: SessionManager, onLogout: () -> Unit) {
             }
         },
     ) {
-        Scaffold(containerColor = AppBackground) { paddingValues ->
+        Scaffold(
+            containerColor = AppBackground,
+            bottomBar = {
+                if (showBottomBar) {
+                    NavigationBar(
+                        containerColor = AppSurface,
+                        tonalElevation = 8.dp
+                    ) {
+                        for (tab in bottomTabs) {
+                            val selected = currentRoute == tab.route
+                            NavigationBarItem(
+                                selected = selected,
+                                onClick = {
+                                    if (currentRoute != tab.route) {
+                                        navController.navigate(tab.route) {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    }
+                                },
+                                icon = { Icon(tab.icon, contentDescription = tab.label) },
+                                label = { Text(tab.label, fontSize = 11.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal) },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = LightBlue,
+                                    selectedTextColor = LightBlue,
+                                    indicatorColor = LightBlue.copy(alpha = 0.1f),
+                                    unselectedIconColor = MutedText,
+                                    unselectedTextColor = MutedText
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        ) { paddingValues ->
             NavHost(
                 navController = navController,
                 startDestination = Routes.DASHBOARD,

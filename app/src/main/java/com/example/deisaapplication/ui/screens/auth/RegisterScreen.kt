@@ -21,6 +21,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.deisaapplication.ui.theme.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.draw.clip
 
 @Composable
 fun RegisterScreen(
@@ -33,6 +36,7 @@ fun RegisterScreen(
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
+    var role by remember { mutableStateOf("petugas_kesehatan") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var showPass by remember { mutableStateOf(false) }
@@ -112,6 +116,88 @@ fun RegisterScreen(
                     )
                     Spacer(Modifier.height(12.dp))
 
+                    // Role selection
+                    Text(
+                        "Daftar Sebagai:",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = OnAppBackground,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Petugas Kesehatan Card
+                        Card(
+                            onClick = { role = "petugas_kesehatan" },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (role == "petugas_kesehatan") Primary.copy(alpha = 0.15f) else AppSurfaceVariant.copy(alpha = 0.5f)
+                            ),
+                            border = androidx.compose.foundation.BorderStroke(
+                                width = 1.5.dp,
+                                color = if (role == "petugas_kesehatan") Primary else Color.Transparent
+                            )
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(12.dp).fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.MedicalServices,
+                                    contentDescription = null,
+                                    tint = if (role == "petugas_kesehatan") Primary else MutedText,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Petugas Kesehatan",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = if (role == "petugas_kesehatan") Primary else OnAppBackground,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+
+                        // Admin Card
+                        Card(
+                            onClick = { role = "admin" },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (role == "admin") Primary.copy(alpha = 0.15f) else AppSurfaceVariant.copy(alpha = 0.5f)
+                            ),
+                            border = androidx.compose.foundation.BorderStroke(
+                                width = 1.5.dp,
+                                color = if (role == "admin") Primary else Color.Transparent
+                            )
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(12.dp).fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.VerifiedUser,
+                                    contentDescription = null,
+                                    tint = if (role == "admin") Primary else MutedText,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Admin",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = if (role == "admin") Primary else OnAppBackground,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(16.dp))
+
                     // Password
                     OutlinedTextField(
                         value = password,
@@ -162,7 +248,7 @@ fun RegisterScreen(
                     Spacer(Modifier.height(24.dp))
 
                     Button(
-                        onClick = { viewModel.register(name, email, phone, password, confirmPassword) },
+                        onClick = { viewModel.register(name, email, phone, password, confirmPassword, role) },
                         modifier = Modifier.fillMaxWidth().height(50.dp),
                         enabled = !uiState.isLoading,
                         shape = RoundedCornerShape(12.dp),

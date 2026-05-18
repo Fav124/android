@@ -5,7 +5,7 @@ import com.example.deisaapplication.data.model.ApiResponse
 import retrofit2.Response
 
 class SettingRepository {
-    private val api = RetrofitClient.instance
+    private val api = RetrofitClient.apiService
 
     suspend fun getSettings(): Result<Response<ApiResponse<Map<String, String>>>> {
         return try {
