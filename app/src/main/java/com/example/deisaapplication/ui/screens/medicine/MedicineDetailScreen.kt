@@ -32,6 +32,7 @@ fun MedicineDetailScreen(
 ) {
     val medicine by viewModel.selectedMedicine.collectAsState()
     var showMutateDialog by remember { mutableStateOf(false) }
+    var mutateDialogType by remember { mutableStateOf("masuk") }
 
     LaunchedEffect(id) {
         viewModel.loadDetail(id)
@@ -56,7 +57,10 @@ fun MedicineDetailScreen(
         } else {
             MedicineDetailContent(
                 medicine = medicine!!,
-                onMutateClick = { showMutateDialog = true },
+                onMutateClick = { type ->
+                    mutateDialogType = type
+                    showMutateDialog = true
+                },
                 modifier = Modifier.padding(pv)
             )
         }
@@ -64,6 +68,7 @@ fun MedicineDetailScreen(
 
     if (showMutateDialog && medicine != null) {
         MutateStockDialog(
+            initialType = mutateDialogType,
             onDismiss = { showMutateDialog = false },
             onSubmit = { type, amount, notes ->
                 viewModel.mutateStock(medicine!!.id, type, amount, notes) { success ->
@@ -77,7 +82,7 @@ fun MedicineDetailScreen(
 @Composable
 private fun MedicineDetailContent(
     medicine: Medicine,
-    onMutateClick: () -> Unit,
+    onMutateClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
