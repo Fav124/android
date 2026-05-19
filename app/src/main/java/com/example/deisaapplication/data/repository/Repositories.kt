@@ -63,6 +63,12 @@ class SicknessCaseRepository {
     suspend fun markRecovered(id: Int) = runCatching { api.markRecovered(id) }
 
     suspend fun notifyGuardian(id: Int) = runCatching { api.notifySicknessGuardian(id) }
+
+    suspend fun discharge(id: Int, body: Map<String, Any?>) = runCatching { api.dischargeSicknessCase(id, body) }
+
+    suspend fun referToHospital(id: Int, body: Map<String, Any?>) = runCatching { api.referSicknessCase(id, body) }
+
+    suspend fun assignBed(id: Int, bedId: Int) = runCatching { api.assignBed(id, mapOf("infirmary_bed_id" to bedId)) }
 }
 
 class MedicineRepository {
@@ -114,6 +120,18 @@ class SantriRepository {
     suspend fun update(id: Int, body: Map<String, Any?>) = runCatching { api.updateSantri(id, body) }
 
     suspend fun delete(id: Int) = runCatching { api.deleteSantri(id) }
+
+    // Guardian CRUD
+    suspend fun getGuardians(santriId: Int) = runCatching { api.getSantriGuardians(santriId) }
+
+    suspend fun addGuardian(santriId: Int, body: Map<String, Any?>) = runCatching { api.addSantriGuardian(santriId, body) }
+
+    suspend fun updateGuardian(santriId: Int, guardianId: Int, body: Map<String, Any?>) =
+        runCatching { api.updateSantriGuardian(santriId, guardianId, body) }
+
+    suspend fun deleteGuardian(santriId: Int, guardianId: Int) = runCatching { api.deleteSantriGuardian(santriId, guardianId) }
+
+    suspend fun notifyGuardian(santriId: Int, guardianId: Int) = runCatching { api.notifyGuardianDirect(santriId, guardianId) }
 }
 
 class DashboardRepository {

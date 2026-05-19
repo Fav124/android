@@ -119,6 +119,91 @@ class SicknessCaseViewModel(private val repo: SicknessCaseRepository) : ViewMode
         }
     }
 
+    fun discharge(
+        id: Int,
+        pickedUpBy: String,
+        guardianId: Int?,
+        dischargeNotes: String?,
+        onResult: (Boolean) -> Unit
+    ) {
+        viewModelScope.launch {
+            _actionLoading.value = true
+            val body = buildMap<String, Any?> {
+                put("picked_up_by", pickedUpBy)
+                if (guardianId != null) put("discharge_guardian_id", guardianId)
+                if (!dischargeNotes.isNullOrBlank()) put("discharge_notes", dischargeNotes)
+                put("status", "recovered")
+            }
+            repo.discharge(id, body)
+                .onSuccess { resp ->
+                    if (resp.isSuccessful) {
+                        _selectedCase.value = resp.body()?.data
+                        _listState.update { it.copy(toast = "Santri berhasil dipulangkan.") }
+                        loadList()
+                        onResult(true)
+                    } else {
+                        _listState.update { it.copy(toast = "Gagal: ${resp.message()}") }
+                        onResult(false)
+                    }
+                }
+                .onFailure { _listState.update { st -> st.copy(toast = "Error: ${it.message}") }; onResult(false) }
+            _actionLoading.value = false
+        }
+    }
+
+    fun referToHospital(
+        id: Int,
+        hospitalName: String,
+        transport: String?,
+        companionName: String?,
+        notes: String?,
+        onResult: (Boolean) -> Unit
+    ) {
+        viewModelScope.launch {
+            _actionLoading.value = true
+            val body = buildMap<String, Any?> {
+                put("hospital_name", hospitalName)
+                put("status", "referred")
+                if (!transport.isNullOrBlank()) put("transport", transport)
+                if (!companionName.isNullOrBlank()) put("companion_name", companionName)
+                if (!notes.isNullOrBlank()) put("notes", notes)
+            }
+            repo.referToHospital(id, body)
+                .onSuccess { resp ->
+                    if (resp.isSuccessful) {
+                        _selectedCase.value = resp.body()?.data
+                        _listState.update { it.copy(toast = "Santri dirujuk ke $hospitalName.") }
+                        loadList()
+                        onResult(true)
+                    } else {
+                        _listState.update { it.copy(toast = "Gagal: ${resp.message()}") }
+                        onResult(false)
+                    }
+                }
+                .onFailure { _listState.update { st -> st.copy(toast = "Error: ${it.message}") }; onResult(false) }
+            _actionLoading.value = false
+        }
+    }
+
+    fun assignBed(id: Int, bedId: Int, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            _actionLoading.value = true
+            repo.assignBed(id, bedId)
+                .onSuccess { resp ->
+                    if (resp.isSuccessful) {
+                        _selectedCase.value = resp.body()?.data
+                        _listState.update { it.copy(toast = "Kasur berhasil ditetapkan.") }
+                        onResult(true)
+                    } else {
+                        _listState.update { it.copy(toast = "Gagal: ${resp.message()}") }
+                        onResult(false)
+                    }
+                }
+                .onFailure { _listState.update { st -> st.copy(toast = "Error: ${it.message}") }; onResult(false) }
+            _actionLoading.value = false
+        }
+    }
+
     fun clearToast() = _listState.update { it.copy(toast = null) }
 
     class Factory : ViewModelProvider.Factory {

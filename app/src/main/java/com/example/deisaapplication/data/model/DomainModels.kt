@@ -69,6 +69,14 @@ data class SicknessCase(
     @SerializedName("handled_by") val handledBy: String? = null,
     val bed: BedRef? = null,
     val medicines: List<MedicineRef> = emptyList(),
+    // Hospital referral fields
+    @SerializedName("hospital_name") val hospitalName: String? = null,
+    val transport: String? = null,
+    @SerializedName("companion_name") val companionName: String? = null,
+    // Discharge fields
+    @SerializedName("picked_up_by") val pickedUpBy: String? = null,
+    @SerializedName("picked_up_at") val pickedUpAt: String? = null,
+    @SerializedName("discharge_notes") val dischargeNotes: String? = null,
 )
 
 data class SicknessRequest(
@@ -82,9 +90,30 @@ data class SicknessRequest(
     val status: String = "observed",
     val medicines: List<MedicineInput>? = null,
     @SerializedName("notify_guardian")  val notifyGuardian: Boolean = false,
+    // For referred status
+    @SerializedName("hospital_name")   val hospitalName: String? = null,
+    val transport: String? = null,
+    @SerializedName("companion_name")  val companionName: String? = null,
+    // For discharge
+    @SerializedName("picked_up_by")    val pickedUpBy: String? = null,
+    @SerializedName("discharge_guardian_id") val dischargeGuardianId: Int? = null,
+    @SerializedName("discharge_notes") val dischargeNotes: String? = null,
 )
 
 data class MedicineInput(val id: Int, val quantity: Int)
+
+// ─── Guardian (Wali) ──────────────────────────────────────────────────────
+
+data class Guardian(
+    val id: Int = 0,
+    val name: String = "",
+    val relationship: String = "",
+    val phone: String = "",
+    val address: String? = null,
+    val job: String? = null,
+    @SerializedName("is_primary") val isPrimary: Boolean = false,
+    val notes: String? = null,
+)
 
 // ─── Santri ────────────────────────────────────────────────────────────────
 
@@ -98,11 +127,14 @@ data class Santri(
     val major: String? = null,
     val dormitory: String? = null,
     @SerializedName("dorm_room")      val dormRoom: String? = null,
+    // Primary guardian kept for backward compat
     @SerializedName("guardian_name")         val guardianName: String? = null,
     @SerializedName("guardian_relationship") val guardianRelationship: String? = null,
     @SerializedName("guardian_phone")        val guardianPhone: String? = null,
     @SerializedName("guardian_address")      val guardianAddress: String? = null,
     @SerializedName("guardian_job")          val guardianJob: String? = null,
+    // Multiple guardians
+    val guardians: List<Guardian> = emptyList(),
     @SerializedName("birth_place")           val birthPlace: String? = null,
     @SerializedName("birth_date")     val birthDate: String? = null,
     val notes: String? = null,
@@ -121,7 +153,8 @@ data class SantriRef(val id: Int, val name: String, val nis: String? = null,
     val gender: String? = null, val dormitory: String? = null,
     @SerializedName("class") val schoolClass: String? = null,
     @SerializedName("guardian_name") val guardianName: String? = null,
-    @SerializedName("guardian_phone") val guardianPhone: String? = null)
+    @SerializedName("guardian_phone") val guardianPhone: String? = null,
+    val guardians: List<Guardian> = emptyList())
 
 // ─── Medicine ──────────────────────────────────────────────────────────────
 

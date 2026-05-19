@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.example.deisaapplication.ui.components.*
 import com.example.deisaapplication.ui.theme.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MedicineFormScreen(
     id: Int?,
@@ -137,7 +138,7 @@ fun MedicineFormScreen(
                                     value = category,
                                     onValueChange = { category = it },
                                     label = { Text("Kategori") },
-                                    readOnly = false,
+                                    readOnly = true,
                                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedCategory) },
                                     modifier = Modifier.menuAnchor().fillMaxWidth(),
                                     shape = RoundedCornerShape(12.dp),
@@ -167,7 +168,7 @@ fun MedicineFormScreen(
                                     value = formulation,
                                     onValueChange = { formulation = it },
                                     label = { Text("Bentuk Sediaan") },
-                                    readOnly = false,
+                                    readOnly = true,
                                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedFormulation) },
                                     modifier = Modifier.menuAnchor().fillMaxWidth(),
                                     shape = RoundedCornerShape(12.dp),
@@ -199,7 +200,7 @@ fun MedicineFormScreen(
                                 value = unit,
                                 onValueChange = { unit = it },
                                 label = { Text("Satuan") },
-                                readOnly = false,
+                                readOnly = true,
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedUnit) },
                                 modifier = Modifier.menuAnchor().fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp),

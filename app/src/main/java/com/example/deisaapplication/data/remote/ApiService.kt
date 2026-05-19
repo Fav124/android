@@ -61,6 +61,24 @@ interface ApiService {
     @POST("kunjungan/{id}/notify-guardian")
     suspend fun notifySicknessGuardian(@Path("id") id: Int): Response<ApiResponse<Unit>>
 
+    @POST("kunjungan/{id}/discharge")
+    suspend fun dischargeSicknessCase(
+        @Path("id") id: Int,
+        @Body body: Map<String, @JvmSuppressWildcards Any?>,
+    ): Response<ApiResponse<SicknessCase>>
+
+    @POST("kunjungan/{id}/refer")
+    suspend fun referSicknessCase(
+        @Path("id") id: Int,
+        @Body body: Map<String, @JvmSuppressWildcards Any?>,
+    ): Response<ApiResponse<SicknessCase>>
+
+    @POST("kunjungan/{id}/assign-bed")
+    suspend fun assignBed(
+        @Path("id") id: Int,
+        @Body body: Map<String, @JvmSuppressWildcards Any?>,
+    ): Response<ApiResponse<SicknessCase>>
+
     // ─── Santri ──────────────────────────────────────────────────────────────
 
     @GET("santri/lookups")
@@ -87,6 +105,37 @@ interface ApiService {
 
     @DELETE("santri/{id}")
     suspend fun deleteSantri(@Path("id") id: Int): Response<ApiResponse<Unit>>
+
+    // ─── Wali Santri ─────────────────────────────────────────────────────────
+
+    @GET("santri/{id}/guardians")
+    suspend fun getSantriGuardians(@Path("id") id: Int): Response<ApiResponse<List<Guardian>>>
+
+    @POST("santri/{id}/guardians")
+    suspend fun addSantriGuardian(
+        @Path("id") id: Int,
+        @Body body: Map<String, @JvmSuppressWildcards Any?>,
+    ): Response<ApiResponse<Guardian>>
+
+    @PUT("santri/{santriId}/guardians/{guardianId}")
+    suspend fun updateSantriGuardian(
+        @Path("santriId") santriId: Int,
+        @Path("guardianId") guardianId: Int,
+        @Body body: Map<String, @JvmSuppressWildcards Any?>,
+    ): Response<ApiResponse<Guardian>>
+
+    @DELETE("santri/{santriId}/guardians/{guardianId}")
+    suspend fun deleteSantriGuardian(
+        @Path("santriId") santriId: Int,
+        @Path("guardianId") guardianId: Int,
+    ): Response<ApiResponse<Unit>>
+
+    @POST("santri/{santriId}/guardians/{guardianId}/notify")
+    suspend fun notifyGuardianDirect(
+        @Path("santriId") santriId: Int,
+        @Path("guardianId") guardianId: Int,
+        @Body body: Map<String, @JvmSuppressWildcards Any?> = emptyMap(),
+    ): Response<ApiResponse<Unit>>
 
     // ─── Obat ────────────────────────────────────────────────────────────────
 

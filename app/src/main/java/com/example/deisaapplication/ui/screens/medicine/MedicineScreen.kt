@@ -35,6 +35,13 @@ fun MedicineScreen(
     var search by remember { mutableStateOf("") }
     var activeFilter by remember { mutableStateOf<String?>(null) }
 
+    LaunchedEffect(state.toast) {
+        if (state.toast != null) {
+            kotlinx.coroutines.delay(3000L)
+            viewModel.clearToast()
+        }
+    }
+
     LaunchedEffect(search, activeFilter) {
         if (search.isNotBlank()) {
             kotlinx.coroutines.delay(2000L)
@@ -61,6 +68,17 @@ fun MedicineScreen(
             }
         },
         containerColor = AppBackground,
+        snackbarHost = {
+            if (state.toast != null) {
+                Snackbar(
+                    modifier = Modifier.padding(16.dp),
+                    containerColor = AppSurface,
+                    contentColor = OnAppBackground,
+                ) {
+                    Text(state.toast!!)
+                }
+            }
+        }
     ) { pv ->
         PullToRefreshBox(
             isRefreshing = state.isLoading,
@@ -153,9 +171,7 @@ fun MedicineScreen(
                         items(state.medicines, key = { it.id }) { med ->
                             MedicineItem(
                                 med = med,
-                                canManageData = canManageData,
                                 onClick = { onViewDetail(med.id) },
-                                onDelete = { viewModel.delete(med.id) }
                             )
                         }
                         item { Spacer(Modifier.height(80.dp)) }
@@ -167,9 +183,10 @@ fun MedicineScreen(
 }
 
 @Composable
-private fun MedicineItem(med: Medicine, canManageData: Boolean, onClick: () -> Unit, onDelete: () -> Unit) {
-    var showDeleteDialog by remember { mutableStateOf(false) }
-
+private fun MedicineItem(
+    med: Medicine,
+    onClick: () -> Unit,
+) {
     DeisaCard(modifier = Modifier.clickable(onClick = onClick)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
@@ -197,32 +214,8 @@ private fun MedicineItem(med: Medicine, canManageData: Boolean, onClick: () -> U
                     else                -> med.status
                 })
             }
-            if (canManageData) {
-                IconButton(onClick = { showDeleteDialog = true }) {
-                    Icon(Icons.Filled.DeleteOutline, "Hapus", tint = AppError)
-                }
-            }
+            Icon(Icons.Filled.ChevronRight, null, tint = MutedText, modifier = Modifier.size(20.dp))
         }
-    }
-
-    if (showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            containerColor = AppSurface,
-            textContentColor = OnAppBackground,
-            title = { Text("Hapus Obat", color = OnAppBackground) },
-            text = { Text("Hapus '${med.name}' dari inventori?", color = MutedText) },
-            confirmButton = {
-                TextButton(onClick = { onDelete(); showDeleteDialog = false }) {
-                    Text("Hapus", color = AppError)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Batal", color = MutedText)
-                }
-            }
-        )
     }
 }
 
