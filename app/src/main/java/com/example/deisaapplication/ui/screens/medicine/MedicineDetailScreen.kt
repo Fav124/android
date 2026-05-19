@@ -122,33 +122,23 @@ private fun MedicineDetailContent(
         }
 
         // Stock Info
-        SectionHeader("Informasi Stok & Lokasi")
-        
+        // Stock Info
         Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            // Restok Button
+            SectionHeader("Informasi Stok & Lokasi")
             Button(
                 onClick = { onMutateClick("masuk") },
-                colors = ButtonDefaults.buttonColors(containerColor = Primary),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.weight(1f).height(40.dp)
-            ) {
-                Icon(Icons.Filled.Add, null, tint = Color.White, modifier = Modifier.size(16.dp))
-                Spacer(Modifier.width(6.dp))
-                Text("Restok Obat", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-            }
-            // Mutasi Button
-            Button(
-                onClick = { onMutateClick("keluar") },
                 colors = ButtonDefaults.buttonColors(containerColor = Secondary),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.weight(1f).height(40.dp)
+                shape = RoundedCornerShape(8.dp),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                modifier = Modifier.height(32.dp)
             ) {
-                Icon(Icons.Filled.SwapHoriz, null, tint = Color.White, modifier = Modifier.size(16.dp))
-                Spacer(Modifier.width(6.dp))
-                Text("Mutasi Lain", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                Icon(Icons.Filled.SwapHoriz, null, tint = Color.White, modifier = Modifier.size(14.dp))
+                Spacer(Modifier.width(4.dp))
+                Text("Mutasi Stok", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
             }
         }
 
@@ -180,7 +170,7 @@ private fun MedicineDetailContent(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            val isPositive = history.type in listOf("masuk", "retur", "penyesuaian")
+                            val isPositive = history.afterStock >= history.beforeStock
                             val icon = if (isPositive) Icons.Default.AddCircle else Icons.Default.RemoveCircle
                             val iconTint = if (isPositive) Primary else AppError
                             
@@ -221,6 +211,12 @@ private fun MedicineDetailContent(
                                     fontSize = 14.sp,
                                     color = iconTint
                                 )
+                                Text(
+                                    text = "${history.beforeStock} → ${history.afterStock}",
+                                    fontSize = 10.sp,
+                                    color = MutedText
+                                )
+                                Spacer(Modifier.height(2.dp))
                                 Text(
                                     text = history.date,
                                     fontSize = 9.sp,

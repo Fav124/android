@@ -125,28 +125,98 @@ fun MedicineFormScreen(
                             colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
                         )
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            OutlinedTextField(
-                                value = category, onValueChange = { category = it },
-                                label = { Text("Kategori") },
-                                modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
-                            )
-                            OutlinedTextField(
-                                value = formulation, onValueChange = { formulation = it },
-                                label = { Text("Bentuk Sediaan") },
-                                modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
-                            )
+                            // Category Dropdown
+                            var expandedCategory by remember { mutableStateOf(false) }
+                            val categories = listOf("Obat Bebas", "Obat Bebas Terbatas", "Obat Keras", "Obat Herbal", "Vitamin", "Alat Kesehatan")
+                            ExposedDropdownMenuBox(
+                                expanded = expandedCategory,
+                                onExpandedChange = { expandedCategory = !expandedCategory },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                OutlinedTextField(
+                                    value = category,
+                                    onValueChange = { category = it },
+                                    label = { Text("Kategori") },
+                                    readOnly = false,
+                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedCategory) },
+                                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
+                                )
+                                ExposedDropdownMenu(expanded = expandedCategory, onDismissRequest = { expandedCategory = false }) {
+                                    categories.forEach { selectionOption ->
+                                        DropdownMenuItem(
+                                            text = { Text(selectionOption) },
+                                            onClick = {
+                                                category = selectionOption
+                                                expandedCategory = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                            // Formulation Dropdown
+                            var expandedFormulation by remember { mutableStateOf(false) }
+                            val formulations = listOf("Tablet", "Kapsul", "Sirup", "Salep", "Tetes", "Injeksi", "Bubuk")
+                            ExposedDropdownMenuBox(
+                                expanded = expandedFormulation,
+                                onExpandedChange = { expandedFormulation = !expandedFormulation },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                OutlinedTextField(
+                                    value = formulation,
+                                    onValueChange = { formulation = it },
+                                    label = { Text("Bentuk Sediaan") },
+                                    readOnly = false,
+                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedFormulation) },
+                                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
+                                )
+                                ExposedDropdownMenu(expanded = expandedFormulation, onDismissRequest = { expandedFormulation = false }) {
+                                    formulations.forEach { selectionOption ->
+                                        DropdownMenuItem(
+                                            text = { Text(selectionOption) },
+                                            onClick = {
+                                                formulation = selectionOption
+                                                expandedFormulation = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
                         }
-                        OutlinedTextField(
-                            value = unit, onValueChange = { unit = it },
-                            label = { Text("Satuan (Tablet/Botol/Pcs)") },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
-                        )
+                        
+                        // Unit Dropdown
+                        var expandedUnit by remember { mutableStateOf(false) }
+                        val units = listOf("Tablet", "Kapsul", "Botol", "Pcs", "Tube", "Ampul", "Sachet", "Kotak", "Strip", "Vial")
+                        ExposedDropdownMenuBox(
+                            expanded = expandedUnit,
+                            onExpandedChange = { expandedUnit = !expandedUnit },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            OutlinedTextField(
+                                value = unit,
+                                onValueChange = { unit = it },
+                                label = { Text("Satuan") },
+                                readOnly = false,
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedUnit) },
+                                modifier = Modifier.menuAnchor().fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
+                            )
+                            ExposedDropdownMenu(expanded = expandedUnit, onDismissRequest = { expandedUnit = false }) {
+                                units.forEach { selectionOption ->
+                                    DropdownMenuItem(
+                                        text = { Text(selectionOption) },
+                                        onClick = {
+                                            unit = selectionOption
+                                            expandedUnit = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

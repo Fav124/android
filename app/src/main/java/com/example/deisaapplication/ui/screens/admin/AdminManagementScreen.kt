@@ -81,6 +81,13 @@ fun AdminManagementScreen(
         viewModel.load(status = defaultStatus)
     }
 
+    LaunchedEffect(search, statusFilter, roleFilter) {
+        if (search.isNotBlank()) {
+            kotlinx.coroutines.delay(2000L)
+        }
+        viewModel.load(status = statusFilter, role = roleFilter, search = search.takeIf { it.isNotBlank() })
+    }
+
     LaunchedEffect(state.toast) {
         if (state.toast != null) {
             kotlinx.coroutines.delay(3500)
@@ -248,10 +255,6 @@ private fun AdminFilters(
                 options = listOf("Semua" to null, "Admin" to "admin", "Petugas" to "petugas_kesehatan"),
                 onSelected = onRoleChange,
             )
-        }
-        Spacer(Modifier.height(8.dp))
-        TextButton(onClick = onApply, modifier = Modifier.align(Alignment.End)) {
-            Text("Terapkan", color = Primary)
         }
     }
 }

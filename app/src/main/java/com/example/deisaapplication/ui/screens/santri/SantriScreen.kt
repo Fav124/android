@@ -50,6 +50,13 @@ fun SantriScreen(
         viewModel.loadLookups()
     }
 
+    LaunchedEffect(search, selectedClass) {
+        if (search.isNotBlank()) {
+            kotlinx.coroutines.delay(2000L)
+        }
+        viewModel.loadList(search = search.takeIf { it.isNotBlank() }, classId = selectedClass?.id)
+    }
+
     Scaffold(
         topBar = {
             DeisaTopBar(
@@ -84,15 +91,13 @@ fun SantriScreen(
                     DeisaLoadingBar()
                 }
                 OutlinedTextField(
-                    value = search, onValueChange = { 
-                        search = it
-                        viewModel.loadList(it.takeIf { it.isNotBlank() }, classId = selectedClass?.id)
-                    },
+                    value = search, 
+                    onValueChange = { search = it },
                     placeholder = { Text("Cari nama santri...", color = MutedText) },
                     leadingIcon = { Icon(Icons.Filled.Search, null, tint = MutedText) },
                     trailingIcon = {
                         if (search.isNotBlank()) {
-                            IconButton(onClick = { search = ""; viewModel.loadList(classId = selectedClass?.id) }) {
+                            IconButton(onClick = { search = "" }) {
                                 Icon(Icons.Filled.Clear, null, tint = MutedText)
                             }
                         }

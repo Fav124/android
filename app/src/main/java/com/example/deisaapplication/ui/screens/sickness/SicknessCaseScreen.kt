@@ -51,6 +51,13 @@ fun SicknessCaseScreen(
         }
     }
 
+    LaunchedEffect(search, selectedStatus) {
+        if (search.isNotBlank()) {
+            kotlinx.coroutines.delay(2000L)
+        }
+        viewModel.loadList(selectedStatus, search.takeIf { it.isNotBlank() })
+    }
+
     Scaffold(
         topBar = {
             DeisaTopBar(
@@ -81,12 +88,13 @@ fun SicknessCaseScreen(
             Column(Modifier.fillMaxSize()) {
                 // Search
                 OutlinedTextField(
-                    value = search, onValueChange = { search = it },
+                    value = search, 
+                    onValueChange = { search = it },
                     placeholder = { Text("Cari nama santri...", color = MutedText) },
                     leadingIcon = { Icon(Icons.Filled.Search, null, tint = MutedText) },
                     trailingIcon = {
                         if (search.isNotBlank()) {
-                            IconButton(onClick = { search = ""; viewModel.loadList(selectedStatus) }) {
+                            IconButton(onClick = { search = "" }) {
                                 Icon(Icons.Filled.Clear, null, tint = MutedText)
                             }
                         }

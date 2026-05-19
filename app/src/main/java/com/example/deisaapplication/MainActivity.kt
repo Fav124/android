@@ -11,6 +11,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.material3.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.Apartment
@@ -110,6 +112,7 @@ import com.example.deisaapplication.ui.theme.MutedText
 import com.example.deisaapplication.ui.theme.OnAppBackground
 import com.example.deisaapplication.ui.theme.Primary
 import com.example.deisaapplication.ui.theme.LightBlue
+import com.example.deisaapplication.ui.theme.Secondary
 import kotlinx.coroutines.launch
 
 object Routes {
@@ -266,23 +269,51 @@ private fun MainShell(session: SessionManager, onLogout: () -> Unit) {
                         .fillMaxHeight()
                         .verticalScroll(rememberScrollState())
                 ) {
-                    Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 24.dp)) {
-                        Box(
-                            modifier = Modifier
-                                .size(60.dp),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.dei),
-                                contentDescription = "Logo",
-                                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
-                                contentScale = ContentScale.Fit
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(Primary.copy(alpha = 0.1f), Color.Transparent)
+                                )
                             )
+                            .padding(horizontal = 24.dp, vertical = 32.dp)
+                    ) {
+                        Column {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .background(Primary.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.dei),
+                                        contentDescription = "Logo",
+                                        modifier = Modifier.fillMaxSize(0.8f).clip(RoundedCornerShape(8.dp)),
+                                        contentScale = ContentScale.Fit
+                                    )
+                                }
+                                Spacer(Modifier.width(16.dp))
+                                Text("DEIHealth", color = Primary, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp, letterSpacing = (-0.5).sp)
+                            }
+                            Spacer(Modifier.height(24.dp))
+                            Text("Welcome back,", color = MutedText, fontSize = 12.sp)
+                            Text(currentUser?.name ?: "Pengguna", color = OnAppBackground, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            Surface(
+                                color = Secondary.copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier.padding(top = 4.dp)
+                            ) {
+                                Text(
+                                    text = currentUser?.roleLabel ?: "", 
+                                    color = Secondary,
+                                    fontSize = 10.sp, 
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                )
+                            }
                         }
-                        Spacer(Modifier.height(16.dp))
-                        Text("DEIHealth", color = OnAppBackground, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-                        Text(currentUser?.name ?: "Pengguna", color = OnAppBackground, fontWeight = FontWeight.SemiBold)
-                        Text(currentUser?.roleLabel ?: "", color = MutedText, fontSize = 12.sp)
                     }
                     DrawerSection("Navigasi Utama", mainItems, currentRoute, navController) { scope.launch { drawerState.close() } }
                     if (masterItems.any { it.visible }) {

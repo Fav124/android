@@ -9,12 +9,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -412,6 +417,8 @@ fun SicknessTrendLineChart(
     trends: List<SicknessTrend>,
     modifier: Modifier = Modifier
 ) {
+    var selectedIndex by remember { mutableStateOf<Int?>(null) }
+
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
@@ -442,7 +449,7 @@ fun SicknessTrendLineChart(
                         .background(Primary.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
-                    Text("14 Hari", color = Primary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text(if (selectedIndex != null) "${trends[selectedIndex!!].count} Kasus" else "14 Hari", color = Primary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Spacer(modifier = Modifier.height(20.dp))
@@ -459,71 +466,91 @@ fun SicknessTrendLineChart(
             } else {
                 val maxCount = trends.maxOf { it.count }.coerceAtLeast(1)
 
-                Canvas(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(160.dp)
                 ) {
-                    val width = size.width
-                    val height = size.height
+                    Canvas(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .pointerInput(trends) {
+                                detectTapGestures { offset ->
+                                    val canvasWidth = size.width.toFloat()
+                                    val pointsCount = trends.size
+                                    val xInterval = canvasWidth / (pointsCount - 1).coerceAtLeast(1).toFloat()
+                                    val clickedIndex = (offset.x / xInterval).toInt().coerceIn(0, pointsCount - 1)
+                                    
+                                    val exactX = clickedIndex * xInterval
+                                    if (kotlin.math.abs(offset.x - exactX) < (xInterval / 2f)) {
+                                        selectedIndex = clickedIndex
+                                    }
+                                }
+                            }
+                    ) {
+                        val width = size.width
+                        val height = size.height
 
-                    val pointsCount = trends.size
-                    val xInterval = width / (pointsCount - 1).coerceAtLeast(1)
+                        val pointsCount = trends.size
+                        val xInterval = width / (pointsCount - 1).coerceAtLeast(1)
 
-                    val path = Path()
-                    val fillPath = Path()
+                        val path = Path()
+                        val fillPath = Path()
 
-                    trends.forEachIndexed { index, trend ->
-                        val x = index * xInterval
-                        val y = height - (trend.count.toFloat() / maxCount.toFloat() * (height - 30f)) - 15f
+                        trends.forEachIndexed { index, trend ->
+                            val x = index * xInterval
+                            val y = height - (trend.count.toFloat() / maxCount.toFloat() * (height - 30f)) - 15f
 
-                        if (index == 0) {
-                            path.moveTo(x, y)
-                            fillPath.moveTo(x, height)
-                            fillPath.lineTo(x, y)
-                        } else {
-                            path.lineTo(x, y)
-                            fillPath.lineTo(x, y)
+                            if (index == 0) {
+                                path.moveTo(x, y)
+                                fillPath.moveTo(x, height)
+                                fillPath.lineTo(x, y)
+                            } else {
+                                path.lineTo(x, y)
+                                fillPath.lineTo(x, y)
+                            }
+
+                            if (index == pointsCount - 1) {
+                                fillPath.lineTo(x, height)
+                                fillPath.close()
+                            }
                         }
 
-                        if (index == pointsCount - 1) {
-                            fillPath.lineTo(x, height)
-                            fillPath.close()
-                        }
-                    }
-
-                    // Draw area gradient fill
-                    drawPath(
-                        path = fillPath,
-                        brush = Brush.verticalGradient(
-                            colors = listOf(Primary.copy(alpha = 0.25f), Color.Transparent),
-                            startY = 0f,
-                            endY = height
+                        // Draw area gradient fill
+                        drawPath(
+                            path = fillPath,
+                            brush = Brush.verticalGradient(
+                                colors = listOf(Primary.copy(alpha = 0.25f), Color.Transparent),
+                                startY = 0f,
+                                endY = height
+                            )
                         )
-                    )
 
-                    // Draw path outline
-                    drawPath(
-                        path = path,
-                        color = Primary,
-                        style = Stroke(width = 6f)
-                    )
-
-                    // Draw highlight circles
-                    trends.forEachIndexed { index, trend ->
-                        val x = index * xInterval
-                        val y = height - (trend.count.toFloat() / maxCount.toFloat() * (height - 30f)) - 15f
-
-                        drawCircle(
-                            color = AppSurface,
-                            radius = 8f,
-                            center = Offset(x, y)
-                        )
-                        drawCircle(
+                        // Draw path outline
+                        drawPath(
+                            path = path,
                             color = Primary,
-                            radius = 5f,
-                            center = Offset(x, y)
+                            style = Stroke(width = 6f)
                         )
+
+                        // Draw highlight circles
+                        trends.forEachIndexed { index, trend ->
+                            val x = index * xInterval
+                            val y = height - (trend.count.toFloat() / maxCount.toFloat() * (height - 30f)) - 15f
+                            
+                            val isSelected = selectedIndex == index
+
+                            drawCircle(
+                                color = AppSurface,
+                                radius = if (isSelected) 12f else 8f,
+                                center = Offset(x, y)
+                            )
+                            drawCircle(
+                                color = if (isSelected) Secondary else Primary,
+                                radius = if (isSelected) 8f else 5f,
+                                center = Offset(x, y)
+                            )
+                        }
                     }
                 }
 
@@ -535,6 +562,7 @@ fun SicknessTrendLineChart(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(trends.first().date, color = MutedText, fontSize = 10.sp)
+                    Text(if (selectedIndex != null) trends[selectedIndex!!].date else "Tgl", color = Secondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     Text(trends.last().date, color = MutedText, fontSize = 10.sp)
                 }
             }
@@ -570,6 +598,8 @@ fun CaseDistributionDonutChart(
         AppWarning
     )
 
+    var selectedIndex by remember { mutableStateOf<Int?>(null) }
+
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
@@ -592,18 +622,38 @@ fun CaseDistributionDonutChart(
                 // Circular Canvas
                 Canvas(
                     modifier = Modifier
-                        .size(120.dp)
+                        .size(130.dp)
                         .weight(1f)
+                        .pointerInput(distributions) {
+                            detectTapGestures { offset ->
+                                val center = Offset(size.width / 2f, size.height / 2f)
+                                val angle = kotlin.math.atan2(offset.y - center.y, offset.x - center.x).times(180 / kotlin.math.PI)
+                                val normalizedAngle = if (angle < 0) angle + 360 else angle
+                                
+                                var currentAngle = 0f
+                                var clickedIndex: Int? = null
+                                for ((i, dist) in distributions.withIndex()) {
+                                    val sweep = (dist.count.toFloat() / totalCount.toFloat()) * 360f
+                                    if (normalizedAngle >= currentAngle && normalizedAngle < currentAngle + sweep) {
+                                        clickedIndex = i
+                                        break
+                                    }
+                                    currentAngle += sweep
+                                }
+                                selectedIndex = if (selectedIndex == clickedIndex) null else clickedIndex
+                            }
+                        }
                 ) {
                     var startAngle = 0f
                     distributions.forEachIndexed { index, dist ->
                         val sweepAngle = (dist.count.toFloat() / totalCount.toFloat()) * 360f
+                        val isSelected = selectedIndex == index
                         drawArc(
-                            color = colors[index % colors.size],
+                            color = colors[index % colors.size].copy(alpha = if (selectedIndex == null || isSelected) 1f else 0.4f),
                             startAngle = startAngle,
                             sweepAngle = sweepAngle,
                             useCenter = false,
-                            style = Stroke(width = 24f)
+                            style = Stroke(width = if (isSelected) 36f else 28f)
                         )
                         startAngle += sweepAngle
                     }
@@ -614,15 +664,16 @@ fun CaseDistributionDonutChart(
                 // Legends listing
                 Column(
                     modifier = Modifier.weight(1.5f),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     distributions.forEachIndexed { index, dist ->
                         val percent = ((dist.count.toFloat() / totalCount.toFloat()) * 100).toInt()
+                        val isSelected = selectedIndex == index
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
                                 modifier = Modifier
-                                    .size(12.dp)
-                                    .background(colors[index % colors.size], RoundedCornerShape(3.dp))
+                                    .size(if (isSelected) 14.dp else 12.dp)
+                                    .background(colors[index % colors.size].copy(alpha = if (selectedIndex == null || isSelected) 1f else 0.4f), RoundedCornerShape(3.dp))
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Column {
@@ -685,9 +736,21 @@ fun HorizontalDistributionBarChart(
                 }
             } else {
                 val maxVal = items.maxOf { it.second }.coerceAtLeast(1)
+                
+                var startAnimation by remember { mutableStateOf(false) }
+                LaunchedEffect(Unit) {
+                    startAnimation = true
+                }
+
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     items.forEach { (label, value) ->
-                        val progress = value.toFloat() / maxVal.toFloat()
+                        val targetProgress = value.toFloat() / maxVal.toFloat()
+                        val animatedProgress by animateFloatAsState(
+                            targetValue = if (startAnimation) targetProgress else 0f,
+                            animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+                            label = "bar_progress"
+                        )
+                        
                         Column {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -717,7 +780,7 @@ fun HorizontalDistributionBarChart(
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .fillMaxWidth(progress)
+                                        .fillMaxWidth(animatedProgress)
                                         .fillMaxHeight()
                                         .background(
                                             Brush.horizontalGradient(

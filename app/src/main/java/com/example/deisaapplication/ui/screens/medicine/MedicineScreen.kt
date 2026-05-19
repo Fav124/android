@@ -35,6 +35,17 @@ fun MedicineScreen(
     var search by remember { mutableStateOf("") }
     var activeFilter by remember { mutableStateOf<String?>(null) }
 
+    LaunchedEffect(search, activeFilter) {
+        if (search.isNotBlank()) {
+            kotlinx.coroutines.delay(2000L)
+        }
+        viewModel.loadList(
+            search   = search.takeIf { it.isNotBlank() },
+            lowStock = if (activeFilter == "low_stock") true else null,
+            expired  = if (activeFilter == "expired") true else null,
+        )
+    }
+
     Scaffold(
         topBar = {
             DeisaTopBar(
@@ -82,12 +93,13 @@ fun MedicineScreen(
 
                 // Search
                 OutlinedTextField(
-                    value = search, onValueChange = { search = it },
+                    value = search, 
+                    onValueChange = { search = it },
                     placeholder = { Text("Cari nama obat...", color = MutedText) },
                     leadingIcon = { Icon(Icons.Filled.Search, null, tint = MutedText) },
                     trailingIcon = {
                         if (search.isNotBlank()) {
-                            IconButton(onClick = { search = ""; viewModel.loadList() }) {
+                            IconButton(onClick = { search = "" }) {
                                 Icon(Icons.Filled.Clear, null, tint = MutedText)
                             }
                         }

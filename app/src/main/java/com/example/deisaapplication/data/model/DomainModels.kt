@@ -129,6 +129,8 @@ data class StockHistoryItem(
     val id: Int = 0,
     val type: String = "",
     val amount: Int = 0,
+    @SerializedName("stok_sebelum") val beforeStock: Int = 0,
+    @SerializedName("stok_sesudah") val afterStock: Int = 0,
     val date: String = "",
     val notes: String? = null,
 )
