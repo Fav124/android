@@ -16,6 +16,7 @@ val AppSurface        = Color(0xFFFFFFFF)
 val AppSurfaceVariant = Color(0xFFF1F5F9) // Light Slate
 val AppError          = Color(0xFFE11D48) // Rose
 val AppWarning        = Color(0xFFF59E0B) // Amber
+val AppSuccess        = Color(0xFF10B981) // Emerald
 
 // Text & Interaction
 val OnPrimary         = Color(0xFFFFFFFF)

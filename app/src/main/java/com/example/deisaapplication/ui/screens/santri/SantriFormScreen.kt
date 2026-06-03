@@ -60,6 +60,26 @@ fun SantriFormScreen(
     var bloodPressure by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
 
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var selectedImageUri by remember { mutableStateOf<android.net.Uri?>(null) }
+    var photoBase64 by remember { mutableStateOf<String?>(null) }
+
+    val imagePickerLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.GetContent()
+    ) { uri: android.net.Uri? ->
+        selectedImageUri = uri
+        uri?.let {
+            try {
+                val bytes = context.contentResolver.openInputStream(it)?.readBytes()
+                if (bytes != null) {
+                    photoBase64 = "data:image/jpeg;base64," + android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     LaunchedEffect(id) {
         viewModel.loadLookups()
         if (id != null) {
@@ -131,6 +151,7 @@ fun SantriFormScreen(
                         "weight" to weight.toDoubleOrNull(),
                         "blood_pressure" to bloodPressure.takeIf { it.isNotBlank() },
                         "notes" to notes.takeIf { it.isNotBlank() },
+                        "photo_base64" to photoBase64
                     )
                     viewModel.save(id, data) { success -> if (success) onBack() }
                 },
@@ -158,6 +179,27 @@ fun SantriFormScreen(
                 }
                 DeisaCard {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)) {
+                            if (selectedImageUri != null) {
+                                Text("Foto profil dipilih", fontSize = 12.sp, color = Primary, modifier = Modifier.padding(bottom = 8.dp))
+                                TextButton(onClick = { selectedImageUri = null; photoBase64 = null }) {
+                                    Text("Hapus Foto", color = AppError)
+                                }
+                            } else {
+                                OutlinedButton(
+                                    onClick = { imagePickerLauncher.launch("image/*") },
+                                    shape = RoundedCornerShape(12.dp),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, Primary)
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.Filled.AccountCircle, null, tint = Primary)
+                                        Spacer(Modifier.width(8.dp))
+                                        Text("Pilih Foto Profil Santri", color = Primary)
+                                    }
+                                }
+                            }
+                        }
+                        
                         OutlinedTextField(
                             value = name, onValueChange = { name = it },
                             label = { Text("Nama Lengkap") },

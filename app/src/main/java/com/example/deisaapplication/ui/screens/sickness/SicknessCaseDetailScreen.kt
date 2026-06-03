@@ -176,7 +176,7 @@ fun SicknessCaseDetailScreen(
                         }
                         if (!c.companionName.isNullOrBlank()) {
                             DeisaDivider()
-                            DetailItem(Icons.Filled.Escort, "Pendamping", c.companionName)
+                            DetailItem(Icons.Filled.Person, "Pendamping", c.companionName)
                         }
                     }
                 }

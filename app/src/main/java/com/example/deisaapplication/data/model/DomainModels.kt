@@ -67,6 +67,7 @@ data class SicknessCase(
     @SerializedName("visit_date") val visitDate: String? = null,
     @SerializedName("return_date") val returnDate: String? = null,
     @SerializedName("handled_by") val handledBy: String? = null,
+    @SerializedName("photo_url") val photoUrl: String? = null,
     val bed: BedRef? = null,
     val medicines: List<MedicineRef> = emptyList(),
     // Hospital referral fields
@@ -80,15 +81,19 @@ data class SicknessCase(
 )
 
 data class SicknessRequest(
-    @SerializedName("santri_id")        val santriId: Int,
+    @SerializedName("santri_ids")       val santriIds: List<Int>,
     @SerializedName("infirmary_bed_id") val infirmaryBedId: Int? = null,
     @SerializedName("visit_date")       val visitDate: String,
-    val complaint: String,
+    @SerializedName("diagnosa_ids")     val diagnosaIds: List<Int>? = null,
+    @SerializedName("keluhan_ids")      val keluhanIds: List<Int>? = null,
+    @SerializedName("tindakan_ids")     val tindakanIds: List<Int>? = null,
+    val complaint: String? = null,
     val diagnosis: String? = null,
     @SerializedName("action_taken")     val actionTaken: String? = null,
     val notes: String? = null,
     val status: String = "observed",
     val medicines: List<MedicineInput>? = null,
+    @SerializedName("photo_base64")     val photoBase64: String? = null,
     @SerializedName("notify_guardian")  val notifyGuardian: Boolean = false,
     // For referred status
     @SerializedName("hospital_name")   val hospitalName: String? = null,
@@ -234,20 +239,50 @@ data class BedRef(val id: Int, val code: String, val room: String? = null)
 // ─── Report ────────────────────────────────────────────────────────────────
 
 data class ReportSummary(
-    @SerializedName("total_santri")  val totalSantri: Int = 0,
-    @SerializedName("santri_sakit")  val santriSakit: Int = 0,
-    @SerializedName("rujukan_rs")    val rujukanRs: Int = 0,
-    @SerializedName("obat_menipis")  val obatMenipis: Int = 0,
+    @SerializedName("total_santri")   val totalSantri: Int = 0,
+    @SerializedName("santri_sakit")   val santriSakit: Int = 0,
+    @SerializedName("rujukan_rs")     val rujukanRs: Int = 0,
+    @SerializedName("obat_menipis")   val obatMenipis: Int = 0,
     @SerializedName("kasur_tersedia") val kasurTersedia: Int = 0,
+    @SerializedName("rawat_inap")     val rawatInap: Int = 0,
+    @SerializedName("sembuh")         val sembuh: Int = 0,
 )
 
 data class ReportData(
     val summary: ReportSummary,
-    @SerializedName("top_diagnoses") val topDiagnoses: List<DiagnosisCount>,
+    @SerializedName("top_diagnoses")  val topDiagnoses: List<DiagnosisCount> = emptyList(),
+    @SerializedName("sickness_cases") val sicknessCases: List<SicknessCase> = emptyList(),
     val filter: DateFilter,
 )
 
 data class DiagnosisCount(val diagnosis: String?, val total: Int)
+
+data class MedicineReportItem(
+    val id: Int = 0,
+    val name: String = "",
+    @SerializedName("kode_obat")    val code: String = "",
+    val kategori: String = "",
+    val stock: Int = 0,
+    @SerializedName("minimum_stock") val minimumStock: Int = 0,
+    val unit: String = "",
+    val status: String = "aman",
+    @SerializedName("expiry_date")  val expiryDate: String? = null,
+    @SerializedName("total_out")    val totalOut: Int = 0,
+    @SerializedName("total_in")     val totalIn: Int = 0,
+)
+
+data class MedicineReportData(
+    val medicines: List<MedicineReportItem> = emptyList(),
+    val summary: MedicineReportSummary = MedicineReportSummary(),
+    val filter: DateFilter = DateFilter("", ""),
+)
+
+data class MedicineReportSummary(
+    @SerializedName("total_obat")    val totalObat: Int = 0,
+    @SerializedName("obat_menipis")  val obatMenipis: Int = 0,
+    @SerializedName("obat_kadaluarsa") val obatKadaluarsa: Int = 0,
+    @SerializedName("total_mutasi")  val totalMutasi: Int = 0,
+)
 
 // ─── Small refs ────────────────────────────────────────────────────────────
 
@@ -267,7 +302,10 @@ data class SantriLookups(
 data class SicknessLookups(
     val santris: List<SantriRef> = emptyList(),
     val beds: List<BedRef> = emptyList(),
-    val medicines: List<MedicineLookupRef> = emptyList()
+    val medicines: List<MedicineLookupRef> = emptyList(),
+    val diagnoses: List<LookupItem> = emptyList(),
+    val keluhans: List<LookupItem> = emptyList(),
+    val tindakans: List<LookupItem> = emptyList()
 )
 
 data class MedicineLookupRef(val id: Int, val name: String, val unit: String? = null, val stock: Int = 0)

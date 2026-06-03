@@ -204,6 +204,20 @@ class SicknessCaseViewModel(private val repo: SicknessCaseRepository) : ViewMode
         }
     }
 
+    fun delete(id: Int, onDone: () -> Unit) {
+        viewModelScope.launch {
+            _actionLoading.value = true
+            repo.delete(id)
+                .onSuccess {
+                    _listState.update { st -> st.copy(toast = "Kasus berhasil dihapus.") }
+                    loadList()
+                    onDone()
+                }
+                .onFailure { _listState.update { st -> st.copy(toast = "Error: ${it.message}") } }
+            _actionLoading.value = false
+        }
+    }
+
     fun clearToast() = _listState.update { it.copy(toast = null) }
 
     class Factory : ViewModelProvider.Factory {

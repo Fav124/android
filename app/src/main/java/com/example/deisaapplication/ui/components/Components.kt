@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -13,6 +15,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -300,87 +303,178 @@ fun <T> DeisaSearchableDropdown(
     modifier: Modifier = Modifier,
     placeholder: String = "Cari...",
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    var searchQuery by remember { mutableStateOf("") }
-    
-    val filteredItems = remember(searchQuery, items) {
-        if (searchQuery.isEmpty()) items
-        else items.filter { itemLabel(it).contains(searchQuery, ignoreCase = true) }
-    }
+    var showDialog by remember { mutableStateOf(false) }
 
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-        modifier = modifier.fillMaxWidth()
-    ) {
+    Box(modifier = modifier.fillMaxWidth().clickable { showDialog = true }) {
         OutlinedTextField(
             value = selectedItem?.let { itemLabel(it) } ?: "",
             onValueChange = {},
             readOnly = true,
+            enabled = false,
             label = { Text(label) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            trailingIcon = { Icon(Icons.Default.Search, null, tint = MutedText) },
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Primary,
-                unfocusedBorderColor = AppSurfaceVariant,
-                focusedTextColor = OnAppBackground,
-                unfocusedTextColor = OnAppBackground,
-                focusedLabelColor = Primary,
-                unfocusedLabelColor = MutedText,
-                focusedContainerColor = AppSurface,
-                unfocusedContainerColor = AppSurface,
+                disabledBorderColor = AppSurfaceVariant,
+                disabledTextColor = OnAppBackground,
+                disabledLabelColor = MutedText,
+                disabledTrailingIconColor = MutedText
             ),
-            modifier = Modifier.menuAnchor().fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         )
+    }
 
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { 
-                expanded = false
-                searchQuery = ""
-            },
-            modifier = Modifier.background(AppSurface).widthIn(max = 300.dp)
-        ) {
-            // Search field at the top
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                placeholder = { Text(placeholder, fontSize = 14.sp) },
-                leadingIcon = { Icon(androidx.compose.material.icons.Icons.Default.Search, null, tint = MutedText) },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Primary,
-                    unfocusedBorderColor = AppSurfaceVariant,
-                    focusedTextColor = OnAppBackground,
-                    unfocusedTextColor = OnAppBackground,
-                    focusedContainerColor = AppSurfaceVariant.copy(alpha = 0.3f),
-                    unfocusedContainerColor = AppSurfaceVariant.copy(alpha = 0.1f),
-                ),
-                singleLine = true,
-                shape = RoundedCornerShape(8.dp)
-            )
-            
-            if (filteredItems.isEmpty()) {
-                DropdownMenuItem(
-                    text = { Text("Tidak ada hasil", color = MutedText, fontSize = 14.sp) },
-                    onClick = { },
-                    enabled = false
-                )
-            } else {
-                filteredItems.forEach { item ->
-                    DropdownMenuItem(
-                        text = { Text(itemLabel(item), color = OnAppBackground) },
-                        onClick = {
-                            onItemSelected(item)
-                            expanded = false
-                            searchQuery = ""
-                        }
-                    )
-                }
-            }
+    if (showDialog) {
+        var searchQuery by remember { mutableStateOf("") }
+        val filteredItems = remember(searchQuery, items) {
+            if (searchQuery.isEmpty()) items
+            else items.filter { itemLabel(it).contains(searchQuery, ignoreCase = true) }
         }
+
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            containerColor = AppSurface,
+            title = { Text("Pilih $label", color = OnAppBackground, fontSize = 18.sp, fontWeight = FontWeight.Bold) },
+            text = {
+                Column(Modifier.fillMaxWidth().fillMaxHeight(0.7f)) {
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                        placeholder = { Text(placeholder, fontSize = 14.sp) },
+                        leadingIcon = { Icon(Icons.Default.Search, null, tint = MutedText) },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant,
+                            focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground
+                        ),
+                        singleLine = true,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+
+                    if (filteredItems.isEmpty()) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("Tidak ada hasil", color = MutedText)
+                        }
+                    } else {
+                        LazyColumn(Modifier.fillMaxSize()) {
+                            items(filteredItems) { item ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            onItemSelected(item)
+                                            showDialog = false
+                                        }
+                                        .padding(vertical = 12.dp, horizontal = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(itemLabel(item), color = OnAppBackground, fontSize = 15.sp)
+                                }
+                                DeisaDivider()
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showDialog = false }) { Text("Tutup", color = MutedText) }
+            }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun <T> DeisaMultiSearchableDropdown(
+    label: String,
+    items: List<T>,
+    selectedItems: List<T>,
+    onItemsSelected: (List<T>) -> Unit,
+    itemLabel: (T) -> String,
+    modifier: Modifier = Modifier,
+    placeholder: String = "Cari...",
+) {
+    var showDialog by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier.fillMaxWidth().clickable { showDialog = true }) {
+        OutlinedTextField(
+            value = if (selectedItems.isEmpty()) "" else "${selectedItems.size} Terpilih",
+            onValueChange = {},
+            readOnly = true,
+            enabled = false,
+            label = { Text(label) },
+            trailingIcon = { Icon(Icons.Default.Search, null, tint = MutedText) },
+            shape = RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                disabledBorderColor = AppSurfaceVariant,
+                disabledTextColor = OnAppBackground,
+                disabledLabelColor = MutedText,
+                disabledTrailingIconColor = MutedText
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+
+    if (showDialog) {
+        var searchQuery by remember { mutableStateOf("") }
+        val filteredItems = remember(searchQuery, items) {
+            if (searchQuery.isEmpty()) items
+            else items.filter { itemLabel(it).contains(searchQuery, ignoreCase = true) }
+        }
+
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            containerColor = AppSurface,
+            title = { Text("Pilih $label", color = OnAppBackground, fontSize = 18.sp, fontWeight = FontWeight.Bold) },
+            text = {
+                Column(Modifier.fillMaxWidth().fillMaxHeight(0.7f)) {
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                        placeholder = { Text(placeholder, fontSize = 14.sp) },
+                        leadingIcon = { Icon(Icons.Default.Search, null, tint = MutedText) },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant,
+                            focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground
+                        ),
+                        singleLine = true,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+
+                    if (filteredItems.isEmpty()) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("Tidak ada hasil", color = MutedText)
+                        }
+                    } else {
+                        LazyColumn(Modifier.fillMaxSize()) {
+                            items(filteredItems) { item ->
+                                val isSelected = selectedItems.contains(item)
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            if (isSelected) onItemsSelected(selectedItems - item)
+                                            else onItemsSelected(selectedItems + item)
+                                        }
+                                        .background(if (isSelected) Primary.copy(alpha = 0.1f) else Color.Transparent)
+                                        .padding(vertical = 12.dp, horizontal = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(itemLabel(item), color = if (isSelected) Primary else OnAppBackground, fontSize = 15.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal)
+                                    Spacer(Modifier.weight(1f))
+                                    if (isSelected) Icon(Icons.Default.Check, null, tint = Primary)
+                                }
+                                DeisaDivider()
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showDialog = false }) { Text("Selesai", color = Primary, fontWeight = FontWeight.Bold) }
+            }
+        )
     }
 }
 

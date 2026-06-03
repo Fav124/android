@@ -251,6 +251,21 @@ interface ApiService {
         @Query("end_date")   endDate: String? = null,
     ): Response<ApiResponse<ReportData>>
 
+    @GET("reports/sickness")
+    suspend fun getSicknessReport(
+        @Query("start_date") startDate: String? = null,
+        @Query("end_date")   endDate: String? = null,
+        @Query("status")     status: String? = null,
+        @Query("per_page")   perPage: Int = 100,
+    ): Response<ApiResponse<ReportData>>
+
+    @GET("reports/medicine")
+    suspend fun getMedicineReport(
+        @Query("start_date")  startDate: String? = null,
+        @Query("end_date")    endDate: String? = null,
+        @Query("status")      status: String? = null,
+    ): Response<ApiResponse<MedicineReportData>>
+
     // ─── Admin ──────────────────────────────────────────────────────────────
 
     @GET("approvals")
