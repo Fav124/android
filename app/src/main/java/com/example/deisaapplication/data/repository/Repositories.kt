@@ -67,8 +67,6 @@ class SicknessCaseRepository {
     suspend fun discharge(id: Int, body: Map<String, Any?>) = runCatching { api.dischargeSicknessCase(id, body) }
 
     suspend fun referToHospital(id: Int, body: Map<String, Any?>) = runCatching { api.referSicknessCase(id, body) }
-
-    suspend fun assignBed(id: Int, bedId: Int) = runCatching { api.assignBed(id, mapOf("infirmary_bed_id" to bedId)) }
 }
 
 class MedicineRepository {
@@ -156,11 +154,6 @@ class MasterDataRepository {
     suspend fun createMajor(body: Map<String, Any?>) = runCatching { api.createMajor(body) }
     suspend fun updateMajor(id: Int, body: Map<String, Any?>) = runCatching { api.updateMajor(id, body) }
     suspend fun deleteMajor(id: Int) = runCatching { api.deleteMajor(id) }
-
-    suspend fun getDormitories() = runCatching { api.getDormitories() }
-    suspend fun createDormitory(body: Map<String, Any?>) = runCatching { api.createDormitory(body) }
-    suspend fun updateDormitory(id: Int, body: Map<String, Any?>) = runCatching { api.updateDormitory(id, body) }
-    suspend fun deleteDormitory(id: Int) = runCatching { api.deleteDormitory(id) }
 }
 
 class AdminRepository {

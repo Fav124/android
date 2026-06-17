@@ -67,7 +67,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.deisaapplication.data.model.DormitoryItem
 import com.example.deisaapplication.data.model.MajorItem
 import com.example.deisaapplication.data.model.SchoolClassItem
 import com.example.deisaapplication.ui.components.DeisaCard
@@ -98,12 +97,9 @@ fun MasterDataScreen(
     val chunkedClasses = remember(state.classes) { state.classes.chunked(2) }
     var showClassDialog by remember { mutableStateOf(false) }
     var showMajorDialog by remember { mutableStateOf(false) }
-    var showDormitoryDialog by remember { mutableStateOf(false) }
     var editingClass by remember { mutableStateOf<SchoolClassItem?>(null) }
     var editingMajor by remember { mutableStateOf<MajorItem?>(null) }
-    var editingDormitory by remember { mutableStateOf<DormitoryItem?>(null) }
     var detailClass by remember { mutableStateOf<SchoolClassItem?>(null) }
-    var detailDormitory by remember { mutableStateOf<DormitoryItem?>(null) }
 
     LaunchedEffect(section) {
         viewModel.load(section)
@@ -136,17 +132,6 @@ fun MasterDataScreen(
                 }
             )
         }
-        showDormitoryDialog -> {
-            DormitoryFormScreen(
-                item = editingDormitory,
-                onDismiss = { showDormitoryDialog = false },
-                onSave = { body ->
-                    viewModel.saveDormitory(editingDormitory?.id, body) { success ->
-                        if (success) showDormitoryDialog = false
-                    }
-                }
-            )
-        }
         detailClass != null -> {
             ClassDetailScreen(
                 item = detailClass!!,
@@ -161,23 +146,6 @@ fun MasterDataScreen(
                 onDelete = {
                     viewModel.deleteClass(detailClass!!.id)
                     detailClass = null
-                }
-            )
-        }
-        detailDormitory != null -> {
-            DormitoryDetailScreen(
-                item = detailDormitory!!,
-                canManageData = canManageData,
-                onDismiss = { detailDormitory = null },
-                onEdit = {
-                    val item = detailDormitory!!
-                    detailDormitory = null
-                    editingDormitory = item
-                    showDormitoryDialog = true
-                },
-                onDelete = {
-                    viewModel.deleteDormitory(detailDormitory!!.id)
-                    detailDormitory = null
                 }
             )
         }
@@ -201,10 +169,6 @@ fun MasterDataScreen(
                                     MasterSection.MAJOR -> {
                                         editingMajor = null
                                         showMajorDialog = true
-                                    }
-                                    MasterSection.DORMITORY -> {
-                                        editingDormitory = null
-                                        showDormitoryDialog = true
                                     }
                                 }
                             },
@@ -234,11 +198,15 @@ fun MasterDataScreen(
                         .padding(paddingValues),
                 ) {
                     when {
-                        state.isLoading && section.items(state).isEmpty() -> LoadingBox()
-                        state.error != null && section.items(state).isEmpty() -> ErrorBox(
-                            message = state.error!!,
-                            onRetry = { viewModel.load(section) },
-                        )
+                        state.isLoading && section.items(state).isEmpty() -> {
+                            LoadingBox()
+                        }
+                        state.error != null && section.items(state).isEmpty() -> {
+                            ErrorBox(
+                                message = state.error!!,
+                                onRetry = { viewModel.load(section) },
+                            )
+                        }
                         else -> {
                             LazyColumn(
                                 modifier = Modifier
@@ -294,18 +262,6 @@ fun MasterDataScreen(
                                             onDelete = { viewModel.deleteMajor(item.id) },
                                         )
                                     }
-                                    MasterSection.DORMITORY -> items(state.dormitories, key = { it.id }) { item ->
-                                        DormitoryCard(
-                                            item = item,
-                                            canManageData = canManageData,
-                                            onClick = { detailDormitory = item },
-                                            onEdit = {
-                                                editingDormitory = item
-                                                showDormitoryDialog = true
-                                            },
-                                            onDelete = { viewModel.deleteDormitory(item.id) },
-                                        )
-                                    }
                                 }
                                 item { Spacer(Modifier.height(96.dp)) }
                             }
@@ -355,22 +311,6 @@ private fun MasterSummary(section: MasterSection, state: MasterDataState) {
                 title = "Dipakai Kelas",
                 value = state.classes.count { it.majorIds.isNotEmpty() }.toString(),
                 icon = Icons.Default.Workspaces,
-                color = Secondary,
-                modifier = Modifier.weight(1f),
-            )
-        }
-        MasterSection.DORMITORY -> Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            ModernStatCard(
-                title = "Total Asrama",
-                value = state.dormitories.size.toString(),
-                icon = Icons.Default.Apartment,
-                color = Primary,
-                modifier = Modifier.weight(1f),
-            )
-            ModernStatCard(
-                title = "Total Penghuni",
-                value = state.dormitories.sumOf { it.santriCount }.toString(),
-                icon = Icons.Default.Person,
                 color = Secondary,
                 modifier = Modifier.weight(1f),
             )
@@ -452,51 +392,6 @@ private fun MajorCard(
             ) {
                 Text(item.name, color = OnAppBackground, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Text(item.description ?: "Belum ada deskripsi.", color = MutedText, fontSize = 12.sp)
-            }
-            if (canManageData) {
-                ActionButtons(onEdit = onEdit, onDelete = onDelete)
-            }
-        }
-    }
-}
-
-@Composable
-private fun DormitoryCard(
-    item: DormitoryItem,
-    canManageData: Boolean,
-    onClick: () -> Unit,
-    onEdit: () -> Unit,
-    onDelete: () -> Unit,
-) {
-    DeisaCard(modifier = Modifier.clickable(onClick = onClick)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(42.dp)
-                    .background(Primary.copy(alpha = 0.12f), CircleShape),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(Icons.Default.Apartment, contentDescription = null, tint = Primary)
-            }
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 12.dp),
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(item.name, color = OnAppBackground, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    StatusBadge(item.gender, if (item.gender == "L") "Putra" else "Putri")
-                }
-                Text(item.building ?: "Bangunan belum diisi", color = MutedText, fontSize = 12.sp)
-                Spacer(Modifier.height(6.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    MetaLine(icon = Icons.Default.MeetingRoom, text = "${item.santriCount} santri")
-                    MetaLine(icon = Icons.Default.Person, text = item.supervisorName ?: "-")
-                }
             }
             if (canManageData) {
                 ActionButtons(onEdit = onEdit, onDelete = onDelete)
@@ -736,115 +631,9 @@ private fun MajorFormScreen(
     }
 }
 
-@Composable
-private fun DormitoryFormScreen(
-    item: DormitoryItem?,
-    onDismiss: () -> Unit,
-    onSave: (Map<String, Any?>) -> Unit,
-) {
-    var name by remember(item) { mutableStateOf(item?.name ?: "") }
-    var building by remember(item) { mutableStateOf(item?.building ?: "") }
-    var gender by remember(item) { mutableStateOf(item?.gender ?: "L") }
-    var supervisorName by remember(item) { mutableStateOf(item?.supervisorName ?: "") }
-    var description by remember(item) { mutableStateOf(item?.description ?: "") }
-
-    Scaffold(
-        topBar = {
-            DeisaTopBar(
-                title = if (item == null) "Tambah Asrama" else "Ubah Asrama",
-                onBack = onDismiss
-            )
-        },
-        containerColor = AppBackground
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = AppSurface)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    OutlinedTextField(
-                        value = name,
-                        onValueChange = { name = it },
-                        label = { Text("Nama Asrama") },
-                        placeholder = { Text("Contoh: Abu Bakar Ash-Shiddiq") },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    OutlinedTextField(
-                        value = building,
-                        onValueChange = { building = it },
-                        label = { Text("Gedung / Bangunan") },
-                        placeholder = { Text("Contoh: Gedung A Lantai 2") },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    DeisaRadioGroup(
-                        label = "Kategori Gender",
-                        options = listOf("L" to "Putra", "P" to "Putri"),
-                        selectedOption = gender,
-                        onOptionSelected = { gender = it },
-                    )
-                    OutlinedTextField(
-                        value = supervisorName,
-                        onValueChange = { supervisorName = it },
-                        label = { Text("Nama Pembina") },
-                        placeholder = { Text("Nama pembina asrama") },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    OutlinedTextField(
-                        value = description,
-                        onValueChange = { description = it },
-                        label = { Text("Deskripsi / Catatan") },
-                        placeholder = { Text("Catatan tambahan mengenai asrama") },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Button(
-                onClick = {
-                    onSave(
-                        mapOf(
-                            "nama_kamar" to name,
-                            "building" to building.ifBlank { null },
-                            "gender" to gender,
-                            "supervisor_name" to supervisorName.ifBlank { null },
-                            "catatan" to description.ifBlank { null },
-                        )
-                    )
-                },
-                enabled = name.isNotBlank(),
-                colors = ButtonDefaults.buttonColors(containerColor = Primary),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                contentPadding = PaddingValues(vertical = 14.dp)
-            ) {
-                Text("Simpan Perubahan", color = AppBackground, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-            }
-        }
-    }
-}
-
 private fun MasterSection.items(state: MasterDataState): List<Any> = when (this) {
     MasterSection.CLASS -> state.classes
     MasterSection.MAJOR -> state.majors
-    MasterSection.DORMITORY -> state.dormitories
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -1209,298 +998,6 @@ private fun ClassDetailScreen(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun DormitoryDetailScreen(
-    item: DormitoryItem,
-    canManageData: Boolean,
-    onDismiss: () -> Unit,
-    onEdit: () -> Unit,
-    onDelete: () -> Unit,
-) {
-    Scaffold(
-        topBar = {
-            DeisaTopBar(
-                title = "Detail Asrama",
-                onBack = onDismiss
-            )
-        },
-        containerColor = AppBackground
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            // 1. Header Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = AppSurface),
-                border = androidx.compose.foundation.BorderStroke(1.2.dp, Primary.copy(alpha = 0.08f))
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(20.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(64.dp)
-                            .background(Primary.copy(alpha = 0.08f), RoundedCornerShape(16.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Apartment,
-                            contentDescription = null,
-                            tint = Primary,
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(20.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = item.name,
-                            color = OnAppBackground,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 22.sp
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = item.building ?: "Gedung Utama",
-                            color = MutedText,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                    StatusBadge(item.gender, if (item.gender == "L") "Putra" else "Putri")
-                }
-            }
-
-            // 2. Info / Meta Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = AppSurface)
-            ) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text("Pembina Asrama", color = MutedText, fontSize = 13.sp)
-                        Text(item.supervisorName ?: "Ustadz / Ustadzah", color = OnAppBackground, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                    }
-                    HorizontalDivider(color = AppBackground, thickness = 1.dp)
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text("Total Santri", color = MutedText, fontSize = 13.sp)
-                        Text("${item.santriCount} Santri", color = Primary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                    }
-                }
-            }
-
-            // 3. Catatan / Deskripsi
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = "Catatan Asrama",
-                    color = OnAppBackground,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = AppSurface)
-                ) {
-                    Text(
-                        text = item.description ?: "Tidak ada catatan untuk asrama ini.",
-                        color = MutedText,
-                        fontSize = 14.sp,
-                        lineHeight = 20.sp,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-            }
-
-            // 4. Santri Terdaftar (Occupants List)
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-                ) {
-                    Text(
-                        text = "Santri Terdaftar",
-                        color = OnAppBackground,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp
-                    )
-                    Text(
-                        text = "${item.santris.size} Santri",
-                        color = Primary,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp,
-                        modifier = Modifier
-                            .background(Primary.copy(alpha = 0.08f), RoundedCornerShape(8.dp))
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                    )
-                }
-
-                if (item.santris.isNotEmpty()) {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        item.santris.forEach { santri ->
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp),
-                                colors = CardDefaults.cardColors(containerColor = AppSurface)
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().padding(14.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(36.dp)
-                                            .background(Primary.copy(alpha = 0.1f), CircleShape),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = santri.name.take(1).uppercase(),
-                                            color = Primary,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 14.sp
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.width(14.dp))
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = santri.name,
-                                            color = OnAppBackground,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 14.sp
-                                        )
-                                        Text(
-                                            text = "NIS: ${santri.nis ?: '-'}",
-                                            color = MutedText,
-                                            fontSize = 12.sp
-                                        )
-                                    }
-                                    if (!santri.schoolClass.isNullOrBlank()) {
-                                        Text(
-                                            text = santri.schoolClass,
-                                            color = Secondary,
-                                            fontSize = 10.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            modifier = Modifier
-                                                .background(Secondary.copy(alpha = 0.08f), RoundedCornerShape(6.dp))
-                                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 24.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Belum ada santri terdaftar di asrama ini.",
-                            color = MutedText,
-                            fontSize = 13.sp,
-                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
-                        )
-                    }
-                }
-            }
-
-            // 5. Actions: Edit and Delete Buttons (Full width)
-            if (canManageData) {
-                Spacer(modifier = Modifier.height(10.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Button(
-                        onClick = onEdit,
-                        colors = ButtonDefaults.buttonColors(containerColor = Primary),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier.weight(1f),
-                        contentPadding = PaddingValues(vertical = 14.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Edit Asrama", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                    }
-
-                    ConfirmDeleteDormitoryButton(
-                        onDelete = onDelete,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ConfirmDeleteDormitoryButton(onDelete: () -> Unit, modifier: Modifier = Modifier) {
-    var showConfirm by remember { mutableStateOf(false) }
-    
-    Button(
-        onClick = { showConfirm = true },
-        colors = ButtonDefaults.buttonColors(containerColor = AppError.copy(alpha = 0.12f)),
-        shape = RoundedCornerShape(16.dp),
-        modifier = modifier,
-        contentPadding = PaddingValues(vertical = 14.dp)
-    ) {
-        Icon(
-            imageVector = Icons.Default.DeleteOutline,
-            contentDescription = null,
-            tint = AppError,
-            modifier = Modifier.size(18.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text("Hapus Asrama", color = AppError, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-    }
-
-    if (showConfirm) {
-        AlertDialog(
-            onDismissRequest = { showConfirm = false },
-            containerColor = AppSurface,
-            title = { Text("Hapus Asrama?", color = OnAppBackground, fontWeight = FontWeight.Bold) },
-            text = { Text("Data asrama ini akan dihapus secara permanen.", color = MutedText) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onDelete()
-                        showConfirm = false
-                    }
-                ) { Text("Hapus", color = AppError, fontWeight = FontWeight.Bold) }
-            },
-            dismissButton = {
-                TextButton(onClick = { showConfirm = false }) { Text("Batal", color = MutedText) }
-            },
-        )
     }
 }
 

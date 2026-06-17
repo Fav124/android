@@ -209,10 +209,6 @@ private fun SantriDetailContent(santri: Santri, modifier: Modifier = Modifier) {
                     DetailItem(Icons.Filled.School, "Kelas", santri.schoolClass ?: "-")
                     DeisaDivider()
                     DetailItem(Icons.Filled.Category, "Jurusan", santri.major ?: "-")
-                    DeisaDivider()
-                    DetailItem(Icons.Filled.Home, "Asrama", santri.dormitory ?: "-")
-                    DeisaDivider()
-                    DetailItem(Icons.Filled.MeetingRoom, "Kamar", santri.dormRoom ?: "-")
                 }
             }
 

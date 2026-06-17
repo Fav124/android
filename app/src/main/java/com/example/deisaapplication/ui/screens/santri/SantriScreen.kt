@@ -258,31 +258,6 @@ private fun SantriItem(
                             )
                         }
                     }
-
-                    // Dormitory Badge
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = Secondary.copy(alpha = 0.08f)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Home,
-                                contentDescription = null,
-                                tint = Secondary,
-                                modifier = Modifier.size(12.dp)
-                            )
-                            Spacer(Modifier.width(4.dp))
-                            Text(
-                                text = santri.dormitory ?: "-",
-                                fontSize = 11.sp,
-                                color = Secondary,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
                 }
             }
         }

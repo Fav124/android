@@ -11,8 +11,6 @@ data class DashboardStats(
     @SerializedName("santri_sakit_aktif") val santriSakitAktif: Int = 0,
     @SerializedName("obat_menipis")       val obatMenipis: Int = 0,
     @SerializedName("obat_kadaluarsa")    val obatKadaluarsa: Int = 0,
-    @SerializedName("kasur_tersedia")     val kasurTersedia: Int = 0,
-    @SerializedName("kasur_total")        val kasurTotal: Int = 0,
     @SerializedName("rujukan")            val rujukan: Int = 0,
 )
 
@@ -68,7 +66,6 @@ data class SicknessCase(
     @SerializedName("return_date") val returnDate: String? = null,
     @SerializedName("handled_by") val handledBy: String? = null,
     @SerializedName("photo_url") val photoUrl: String? = null,
-    val bed: BedRef? = null,
     val medicines: List<MedicineRef> = emptyList(),
     // Hospital referral fields
     @SerializedName("hospital_name") val hospitalName: String? = null,
@@ -82,7 +79,6 @@ data class SicknessCase(
 
 data class SicknessRequest(
     @SerializedName("santri_ids")       val santriIds: List<Int>,
-    @SerializedName("infirmary_bed_id") val infirmaryBedId: Int? = null,
     @SerializedName("visit_date")       val visitDate: String,
     @SerializedName("diagnosa_ids")     val diagnosaIds: List<Int>? = null,
     @SerializedName("keluhan_ids")      val keluhanIds: List<Int>? = null,
@@ -130,8 +126,6 @@ data class Santri(
     @SerializedName("gender_label") val genderLabel: String = "Laki-laki",
     @SerializedName("class") val schoolClass: String? = null,
     val major: String? = null,
-    val dormitory: String? = null,
-    @SerializedName("dorm_room")      val dormRoom: String? = null,
     // Primary guardian kept for backward compat
     @SerializedName("guardian_name")         val guardianName: String? = null,
     @SerializedName("guardian_relationship") val guardianRelationship: String? = null,
@@ -155,7 +149,7 @@ data class Santri(
 )
 
 data class SantriRef(val id: Int, val name: String, val nis: String? = null,
-    val gender: String? = null, val dormitory: String? = null,
+    val gender: String? = null,
     @SerializedName("class") val schoolClass: String? = null,
     @SerializedName("guardian_name") val guardianName: String? = null,
     @SerializedName("guardian_phone") val guardianPhone: String? = null,
@@ -222,20 +216,6 @@ data class ReferralRequest(
     @SerializedName("notify_guardian") val notifyGuardian: Boolean = false,
 )
 
-// ─── Bed ───────────────────────────────────────────────────────────────────
-
-data class InfirmaryBed(
-    val id: Int = 0,
-    val code: String = "",
-    @SerializedName("room_name")     val roomName: String = "UKS",
-    val status: String = "available",
-    @SerializedName("status_label")  val statusLabel: String = "Tersedia",
-    @SerializedName("occupant_name") val occupantName: String? = null,
-    val notes: String? = null,
-)
-
-data class BedRef(val id: Int, val code: String, val room: String? = null)
-
 // ─── Report ────────────────────────────────────────────────────────────────
 
 data class ReportSummary(
@@ -243,7 +223,6 @@ data class ReportSummary(
     @SerializedName("santri_sakit")   val santriSakit: Int = 0,
     @SerializedName("rujukan_rs")     val rujukanRs: Int = 0,
     @SerializedName("obat_menipis")   val obatMenipis: Int = 0,
-    @SerializedName("kasur_tersedia") val kasurTersedia: Int = 0,
     @SerializedName("rawat_inap")     val rawatInap: Int = 0,
     @SerializedName("sembuh")         val sembuh: Int = 0,
 )
@@ -296,12 +275,10 @@ data class LookupItem(val id: Int, val name: String)
 data class SantriLookups(
     val classes: List<LookupItem> = emptyList(),
     val majors: List<LookupItem> = emptyList(),
-    val dormitories: List<LookupItem> = emptyList()
 )
 
 data class SicknessLookups(
     val santris: List<SantriRef> = emptyList(),
-    val beds: List<BedRef> = emptyList(),
     val medicines: List<MedicineLookupRef> = emptyList(),
     val diagnoses: List<LookupItem> = emptyList(),
     val keluhans: List<LookupItem> = emptyList(),
@@ -328,24 +305,12 @@ data class SantriClassRef(
     val gender: String? = null,
     @SerializedName("gender_label") val genderLabel: String? = null,
     val major: String? = null,
-    val dormitory: String? = null,
 )
 
 data class MajorItem(
     val id: Int = 0,
     @SerializedName("nama_jurusan") val name: String = "",
     @SerializedName("deskripsi") val description: String? = null,
-)
-
-data class DormitoryItem(
-    val id: Int = 0,
-    @SerializedName("nama_kamar") val name: String = "",
-    val building: String? = null,
-    val gender: String = "L",
-    @SerializedName("supervisor_name") val supervisorName: String? = null,
-    @SerializedName("catatan") val description: String? = null,
-    @SerializedName("santri_count") val santriCount: Int = 0,
-    val santris: List<SantriRef> = emptyList(),
 )
 
 data class ItemsResponse<T>(

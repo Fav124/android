@@ -41,7 +41,6 @@ fun SicknessCaseDetailScreen(
 
     var showDischargeDialog by remember { mutableStateOf(false) }
     var showReferDialog by remember { mutableStateOf(false) }
-    var showBedDialog by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
 
     LaunchedEffect(id) {
@@ -85,9 +84,6 @@ fun SicknessCaseDetailScreen(
                             Text(c.santri?.name ?: "-", fontWeight = FontWeight.ExtraBold, fontSize = 20.sp, color = OnAppBackground)
                             Text("NIS: ${c.santri?.nis ?: "-"}", fontSize = 13.sp, color = MutedText)
                             Text("Kelas: ${c.santri?.schoolClass ?: "-"}", fontSize = 13.sp, color = MutedText)
-                            if (c.santri?.dormitory != null) {
-                                Text("Asrama: ${c.santri.dormitory}", fontSize = 12.sp, color = MutedText)
-                            }
                         }
                         StatusBadge(c.status, c.statusLabel ?: c.status)
                     }
@@ -98,7 +94,6 @@ fun SicknessCaseDetailScreen(
                     "observed" -> {
                         SectionHeader("Tindak Lanjut")
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            ActionBtn("Rawat Inap\nUKS", Icons.Filled.Bed, Primary, Modifier.weight(1f)) { showBedDialog = true }
                             ActionBtn("Rujuk RS", Icons.Filled.LocalHospital, Secondary, Modifier.weight(1f)) { showReferDialog = true }
                             ActionBtn("Sembuh", Icons.Filled.CheckCircle, AppSuccess, Modifier.weight(1f)) { showDischargeDialog = true }
                         }
@@ -119,7 +114,6 @@ fun SicknessCaseDetailScreen(
                     "handled" -> {
                         SectionHeader("Tindak Lanjut")
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            ActionBtn("Rawat Inap\nUKS", Icons.Filled.Bed, Primary, Modifier.weight(1f)) { showBedDialog = true }
                             ActionBtn("Rujuk RS", Icons.Filled.LocalHospital, Secondary, Modifier.weight(1f)) { showReferDialog = true }
                             ActionBtn("Sembuh", Icons.Filled.CheckCircle, AppSuccess, Modifier.weight(1f)) { showDischargeDialog = true }
                         }
@@ -154,14 +148,6 @@ fun SicknessCaseDetailScreen(
                     if (c.returnDate != null) {
                         DeisaDivider()
                         DetailItem(Icons.Filled.EventAvailable, "Tanggal Keluar", c.returnDate)
-                    }
-                }
-
-                // ── Bed / UKS Info ────────────────────────────────────────────
-                if (c.bed != null) {
-                    SectionHeader("Rawat Inap UKS")
-                    DeisaCard {
-                        DetailItem(Icons.Filled.Bed, "Kasur", "${c.bed.code} – ${c.bed.room ?: "UKS"}")
                     }
                 }
 
@@ -272,18 +258,6 @@ fun SicknessCaseDetailScreen(
             onSubmit = { hospital, transport, companion, notes ->
                 viewModel.referToHospital(id, hospital, transport, companion, notes) { ok ->
                     if (ok) showReferDialog = false
-                }
-            }
-        )
-    }
-
-    if (showBedDialog) {
-        AssignBedDialog(
-            beds = lookups.beds,
-            onDismiss = { showBedDialog = false },
-            onSubmit = { bedId ->
-                viewModel.assignBed(id, bedId) { ok ->
-                    if (ok) showBedDialog = false
                 }
             }
         )
@@ -491,57 +465,6 @@ fun ReferHospitalDialog(
                 onClick = { if (hospital.isNotBlank()) onSubmit(hospital, transport.takeIf { it.isNotBlank() }, companion.takeIf { it.isNotBlank() }, notes.takeIf { it.isNotBlank() }) },
                 colors = ButtonDefaults.buttonColors(containerColor = Secondary)
             ) { Text("Rujuk", color = Color.White, fontWeight = FontWeight.Bold) }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Batal", color = MutedText) } }
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AssignBedDialog(
-    beds: List<com.example.deisaapplication.data.model.BedRef>,
-    onDismiss: () -> Unit,
-    onSubmit: (bedId: Int) -> Unit,
-) {
-    var selectedBed by remember { mutableStateOf<com.example.deisaapplication.data.model.BedRef?>(null) }
-    var expanded by remember { mutableStateOf(false) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = AppSurface,
-        title = { Text("Tetapkan Kasur UKS", fontWeight = FontWeight.Bold, color = OnAppBackground) },
-        text = {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text("Pilih kasur yang tersedia untuk rawat inap:", color = MutedText, fontSize = 12.sp, modifier = Modifier.padding(bottom = 12.dp))
-                ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
-                    OutlinedTextField(
-                        value = selectedBed?.code ?: "Pilih Kasur",
-                        onValueChange = {}, readOnly = true,
-                        label = { Text("Kasur UKS") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                        modifier = Modifier.menuAnchor().fillMaxWidth(),
-                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
-                    )
-                    ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                        if (beds.isEmpty()) {
-                            DropdownMenuItem(text = { Text("Tidak ada kasur tersedia", color = MutedText) }, onClick = {})
-                        }
-                        beds.forEach { bed ->
-                            DropdownMenuItem(
-                                text = { Text("${bed.code} – ${bed.room ?: "UKS"}") },
-                                onClick = { selectedBed = bed; expanded = false }
-                            )
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = { selectedBed?.let { onSubmit(it.id) } },
-                colors = ButtonDefaults.buttonColors(containerColor = Primary),
-                enabled = selectedBed != null
-            ) { Text("Tetapkan", color = Color.White, fontWeight = FontWeight.Bold) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Batal", color = MutedText) } }
     )

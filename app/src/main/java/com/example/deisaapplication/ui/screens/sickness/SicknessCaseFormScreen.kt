@@ -38,7 +38,6 @@ fun SicknessCaseFormScreen(
 
     // Form states
     var selectedSantris by remember { mutableStateOf<List<SantriRef>>(emptyList()) }
-    var selectedBed by remember { mutableStateOf<BedRef?>(null) }
     var visitDate by remember { mutableStateOf(LocalDate.now().toString()) }
     var complaint by remember { mutableStateOf("") }
     var diagnosis by remember { mutableStateOf("") }
@@ -66,7 +65,6 @@ fun SicknessCaseFormScreen(
     LaunchedEffect(case) {
         case?.let { c ->
             selectedSantris = c.santri?.let { listOf(it) } ?: emptyList() // If editing, we just map it as a single element array
-            selectedBed = c.bed
             visitDate = c.visitDate ?: LocalDate.now().toString()
             complaint = c.complaint ?: ""
             diagnosis = c.diagnosis ?: ""
@@ -125,7 +123,6 @@ fun SicknessCaseFormScreen(
                                 
                                 val req = SicknessRequest(
                                     santriIds = selectedSantris.map { it.id },
-                                    infirmaryBedId = selectedBed?.id,
                                     visitDate = visitDate,
                                     diagnosaIds = selectedDiagnoses.map { it.id }.takeIf { it.isNotEmpty() },
                                     keluhanIds = selectedKeluhans.map { it.id }.takeIf { it.isNotEmpty() },
@@ -265,16 +262,6 @@ fun SicknessCaseFormScreen(
                                         selectedOption = status,
                                         onOptionSelected = { status = it }
                                     )
-
-                                    if (status == "observed" || status == "rawat_inap") {
-                                        DeisaDropdown(
-                                            label = "Pilih Kasur UKS",
-                                            items = lookups.beds,
-                                            selectedItem = selectedBed,
-                                            onItemSelected = { selectedBed = it },
-                                            itemLabel = { it.code }
-                                        )
-                                    }
                                 }
                             }
                             
@@ -355,6 +342,17 @@ fun MedicineSelector(
     onChanged: (List<MedicineInput>) -> Unit,
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    // Keep these states at composable level (not inside if block) to avoid Compose anti-pattern
+    var dialogSelectedMed by remember { mutableStateOf<MedicineLookupRef?>(null) }
+    var dialogQuantity by remember { mutableStateOf("1") }
+
+    // Reset dialog state every time it's opened
+    LaunchedEffect(showDialog) {
+        if (showDialog) {
+            dialogSelectedMed = null
+            dialogQuantity = "1"
+        }
+    }
 
     Column(Modifier.fillMaxWidth()) {
         SectionHeader(title = "Obat-obatan", action = {
@@ -387,37 +385,38 @@ fun MedicineSelector(
     }
 
     if (showDialog) {
-        var selectedMed by remember { mutableStateOf<MedicineLookupRef?>(null) }
-        var quantity by remember { mutableStateOf("1") }
-
         AlertDialog(
             onDismissRequest = { showDialog = false },
             containerColor = AppSurface,
             title = { Text("Tambah Obat", color = OnAppBackground) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    // Filter out already-selected medicines
+                    val filteredMeds = availableMedicines.filter { m -> selectedMedicines.none { it.id == m.id } }
                     DeisaSearchableDropdown(
                         label = "Pilih Obat",
-                        items = availableMedicines,
-                        selectedItem = selectedMed,
-                        onItemSelected = { selectedMed = it },
+                        items = filteredMeds,
+                        selectedItem = dialogSelectedMed,
+                        onItemSelected = { dialogSelectedMed = it },
                         itemLabel = { "${it.name} (Stok: ${it.stock})" }
                     )
                     OutlinedTextField(
-                        value = quantity, onValueChange = { quantity = it },
+                        value = dialogQuantity, onValueChange = { dialogQuantity = it },
                         label = { Text("Jumlah") },
                         modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
                         colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Primary, unfocusedBorderColor = AppSurfaceVariant, focusedTextColor = OnAppBackground, unfocusedTextColor = OnAppBackground)
                     )
                 }
             },
             confirmButton = {
                 TextButton(onClick = {
-                    val q = quantity.toIntOrNull() ?: 1
-                    if (selectedMed != null) {
-                        onChanged(selectedMedicines + MedicineInput(selectedMed!!.id, q))
+                    val q = dialogQuantity.toIntOrNull()?.takeIf { it > 0 } ?: 1
+                    val med = dialogSelectedMed
+                    if (med != null) {
+                        onChanged(selectedMedicines + MedicineInput(med.id, q))
+                        showDialog = false
                     }
-                    showDialog = false
                 }) { Text("Tambah", color = Primary) }
             },
             dismissButton = {

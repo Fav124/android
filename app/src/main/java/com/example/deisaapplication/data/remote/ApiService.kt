@@ -73,11 +73,6 @@ interface ApiService {
         @Body body: Map<String, @JvmSuppressWildcards Any?>,
     ): Response<ApiResponse<SicknessCase>>
 
-    @POST("kunjungan/{id}/assign-bed")
-    suspend fun assignBed(
-        @Path("id") id: Int,
-        @Body body: Map<String, @JvmSuppressWildcards Any?>,
-    ): Response<ApiResponse<SicknessCase>>
 
     // ─── Santri ──────────────────────────────────────────────────────────────
 
@@ -89,7 +84,6 @@ interface ApiService {
         @Query("search")       search: String? = null,
         @Query("gender")       gender: String? = null,
         @Query("class_id")     classId: Int? = null,
-        @Query("dormitory_id") dormitoryId: Int? = null,
         @Query("page")         page: Int = 1,
         @Query("per_page")     perPage: Int = 20,
     ): Response<PaginatedResponse<Santri>>
@@ -164,19 +158,6 @@ interface ApiService {
     @POST("obat/mutasi")
     suspend fun recordStockMutation(@Body body: Map<String, @JvmSuppressWildcards Any?>): Response<ApiResponse<Unit>>
 
-    // ─── Kasur UKS ───────────────────────────────────────────────────────────
-
-    @GET("rawat-inap")
-    suspend fun getBeds(@Query("status") status: String? = null): Response<ApiResponse<List<InfirmaryBed>>>
-
-    @POST("rawat-inap")
-    suspend fun createBed(@Body body: Map<String, @JvmSuppressWildcards Any?>): Response<ApiResponse<InfirmaryBed>>
-
-    @PUT("rawat-inap/{id}")
-    suspend fun updateBed(@Path("id") id: Int, @Body body: Map<String, @JvmSuppressWildcards Any?>): Response<ApiResponse<InfirmaryBed>>
-
-    @DELETE("rawat-inap/{id}")
-    suspend fun deleteBed(@Path("id") id: Int): Response<ApiResponse<Unit>>
 
     // ─── Master Data ────────────────────────────────────────────────────────
 
@@ -203,18 +184,6 @@ interface ApiService {
 
     @DELETE("master/jurusan/{id}")
     suspend fun deleteMajor(@Path("id") id: Int): Response<ApiResponse<Unit>>
-
-    @GET("master/kamar")
-    suspend fun getDormitories(): Response<ApiResponse<ItemsResponse<DormitoryItem>>>
-
-    @POST("master/kamar")
-    suspend fun createDormitory(@Body body: Map<String, @JvmSuppressWildcards Any?>): Response<ApiResponse<ItemResponse<DormitoryItem>>>
-
-    @PUT("master/kamar/{id}")
-    suspend fun updateDormitory(@Path("id") id: Int, @Body body: Map<String, @JvmSuppressWildcards Any?>): Response<ApiResponse<ItemResponse<DormitoryItem>>>
-
-    @DELETE("master/kamar/{id}")
-    suspend fun deleteDormitory(@Path("id") id: Int): Response<ApiResponse<Unit>>
 
     // ─── Rujukan RS ──────────────────────────────────────────────────────────
 

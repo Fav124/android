@@ -185,25 +185,6 @@ class SicknessCaseViewModel(private val repo: SicknessCaseRepository) : ViewMode
         }
     }
 
-    fun assignBed(id: Int, bedId: Int, onResult: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            _actionLoading.value = true
-            repo.assignBed(id, bedId)
-                .onSuccess { resp ->
-                    if (resp.isSuccessful) {
-                        _selectedCase.value = resp.body()?.data
-                        _listState.update { it.copy(toast = "Kasur berhasil ditetapkan.") }
-                        onResult(true)
-                    } else {
-                        _listState.update { it.copy(toast = "Gagal: ${resp.message()}") }
-                        onResult(false)
-                    }
-                }
-                .onFailure { _listState.update { st -> st.copy(toast = "Error: ${it.message}") }; onResult(false) }
-            _actionLoading.value = false
-        }
-    }
-
     fun delete(id: Int, onDone: () -> Unit) {
         viewModelScope.launch {
             _actionLoading.value = true

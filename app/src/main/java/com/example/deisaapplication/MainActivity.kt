@@ -17,7 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.Apartment
 import androidx.compose.material.icons.filled.Assessment
-import androidx.compose.material.icons.filled.Bed
 import androidx.compose.material.icons.filled.Class
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.LocalHospital
@@ -77,8 +76,6 @@ import com.example.deisaapplication.ui.screens.admin.AdminManagementViewModel
 import com.example.deisaapplication.ui.screens.auth.AuthViewModel
 import com.example.deisaapplication.ui.screens.auth.LoginScreen
 import com.example.deisaapplication.ui.screens.splash.SplashScreen
-import com.example.deisaapplication.ui.screens.bed.InfirmaryBedScreen
-import com.example.deisaapplication.ui.screens.bed.InfirmaryBedViewModel
 import com.example.deisaapplication.ui.screens.dashboard.DashboardScreen
 import com.example.deisaapplication.ui.screens.dashboard.DashboardViewModel
 import com.example.deisaapplication.ui.screens.settings.SettingsScreen
@@ -125,10 +122,8 @@ object Routes {
     const val SANTRI = "santri"
     const val CLASS = "class"
     const val MAJOR = "major"
-    const val DORMITORY = "dormitory"
     const val SICKNESS = "sickness"
     const val MEDICINE = "medicine"
-    const val BED = "bed"
     const val REFERRAL = "referral"
     const val REPORT = "report"
     const val USERS = "users"
@@ -242,11 +237,9 @@ private fun MainShell(session: SessionManager, onLogout: () -> Unit) {
         DrawerNavItem(Routes.SANTRI, "Data Santri", Icons.Default.People, visible = canAccessHealth),
         DrawerNavItem(Routes.CLASS, "Data Kelas", Icons.Default.Class, visible = canManageData),
         DrawerNavItem(Routes.MAJOR, "Data Jurusan", Icons.Default.School, visible = canManageData),
-        DrawerNavItem(Routes.DORMITORY, "Data Asrama", Icons.Default.Apartment, visible = canManageData),
     )
     val healthItems = listOf(
         DrawerNavItem(Routes.MEDICINE, "Stok Obat", Icons.Default.Medication, visible = canAccessHealth),
-        DrawerNavItem(Routes.BED, "Kasur UKS", Icons.Default.Bed, visible = canAccessHealth),
         DrawerNavItem(Routes.SICKNESS, "Santri Sakit", Icons.Default.MedicalServices, visible = canAccessHealth),
         DrawerNavItem(Routes.REFERRAL, "Rujukan RS", Icons.Default.LocalHospital, visible = canAccessHealth),
         DrawerNavItem(Routes.REPORT, "Laporan", Icons.Default.Assessment, visible = canAccessHealth),
@@ -421,21 +414,6 @@ private fun MainShell(session: SessionManager, onLogout: () -> Unit) {
                         )
                     }
                 }
-                composable(Routes.DORMITORY) {
-                    if (!canManageData) {
-                        LaunchedEffect(Unit) {
-                            navController.popBackStack()
-                        }
-                    } else {
-                        val vm: MasterDataViewModel = viewModel(factory = MasterDataViewModel.Factory())
-                        MasterDataScreen(
-                            section = MasterSection.DORMITORY,
-                            viewModel = vm,
-                            canManageData = canManageData,
-                            onOpenDrawer = { scope.launch { drawerState.open() } },
-                        )
-                    }
-                }
                 composable(Routes.SICKNESS) {
                     val vm: SicknessCaseViewModel = viewModel(factory = SicknessCaseViewModel.Factory())
                     SicknessCaseScreen(
@@ -454,15 +432,6 @@ private fun MainShell(session: SessionManager, onLogout: () -> Unit) {
                         onOpenDrawer = { scope.launch { drawerState.open() } },
                         onAddNew = { navController.navigate(Routes.MEDICINE_FORM.replace("{id}", "-1")) },
                         onViewDetail = { navController.navigate(Routes.withId(Routes.MEDICINE_DETAIL, it)) },
-                    )
-                }
-                composable(Routes.BED) {
-                    val vm: InfirmaryBedViewModel = viewModel(factory = InfirmaryBedViewModel.Factory())
-                    InfirmaryBedScreen(
-                        viewModel = vm,
-                        canManageData = canManageData,
-                        onOpenDrawer = { scope.launch { drawerState.open() } },
-                        onAddNew = {},
                     )
                 }
                 composable(Routes.REFERRAL) {

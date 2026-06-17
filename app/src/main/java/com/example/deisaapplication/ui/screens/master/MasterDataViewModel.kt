@@ -3,7 +3,6 @@ package com.example.deisaapplication.ui.screens.master
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.deisaapplication.data.model.DormitoryItem
 import com.example.deisaapplication.data.model.MajorItem
 import com.example.deisaapplication.data.model.SchoolClassItem
 import com.example.deisaapplication.data.repository.MasterDataRepository
@@ -17,13 +16,11 @@ import retrofit2.Response
 enum class MasterSection(val title: String) {
     CLASS("Data Kelas"),
     MAJOR("Data Jurusan"),
-    DORMITORY("Data Asrama"),
 }
 
 data class MasterDataState(
     val classes: List<SchoolClassItem> = emptyList(),
     val majors: List<MajorItem> = emptyList(),
-    val dormitories: List<DormitoryItem> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
     val toast: String? = null,
@@ -41,7 +38,6 @@ class MasterDataViewModel(
             when (section) {
                 MasterSection.CLASS -> loadClasses()
                 MasterSection.MAJOR -> loadMajors()
-                MasterSection.DORMITORY -> loadDormitories()
             }
             _state.update { it.copy(isLoading = false) }
         }
@@ -109,34 +105,6 @@ class MasterDataViewModel(
         }
     }
 
-    fun saveDormitory(id: Int?, body: Map<String, Any?>, onDone: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
-            val result = if (id == null) repo.createDormitory(body) else repo.updateDormitory(id, body)
-            handleMutation(
-                result = result,
-                successMessage = "Data asrama berhasil disimpan.",
-                onSuccess = {
-                    loadDormitories()
-                    onDone(true)
-                },
-                onError = {
-                    onDone(false)
-                }
-            )
-        }
-    }
-
-    fun deleteDormitory(id: Int) {
-        viewModelScope.launch {
-            handleMutation(
-                result = repo.deleteDormitory(id),
-                successMessage = "Data asrama berhasil dihapus.",
-                onSuccess = { loadDormitories() }
-            )
-        }
-    }
-
     fun clearToast() {
         _state.update { it.copy(toast = null) }
     }
@@ -167,20 +135,6 @@ class MasterDataViewModel(
                 }
             }
             .onFailure { exception -> _state.update { state -> state.copy(error = exception.message ?: "Gagal memuat data jurusan.") } }
-    }
-
-    private suspend fun loadDormitories() {
-        repo.getDormitories()
-            .onSuccess { response ->
-                if (response.isSuccessful) {
-                    _state.update {
-                        it.copy(dormitories = response.body()?.data?.items ?: emptyList(), error = null)
-                    }
-                } else {
-                    _state.update { it.copy(error = "Gagal memuat data asrama.") }
-                }
-            }
-            .onFailure { exception -> _state.update { state -> state.copy(error = exception.message ?: "Gagal memuat data asrama.") } }
     }
 
     private suspend fun handleMutation(

@@ -40,8 +40,6 @@ fun SantriFormScreen(
     // Akademik
     var selectedClass by remember { mutableStateOf<LookupItem?>(null) }
     var selectedMajor by remember { mutableStateOf<LookupItem?>(null) }
-    var selectedDormitory by remember { mutableStateOf<LookupItem?>(null) }
-    var dormRoom by remember { mutableStateOf("") }
     
     // Guardian Data
     var guardianName by remember { mutableStateOf("") }
@@ -96,7 +94,6 @@ fun SantriFormScreen(
             gender = s.gender
             birthPlace = s.birthPlace ?: ""
             birthDate = s.birthDate ?: ""
-            dormRoom = s.dormRoom ?: ""
             guardianName = s.guardianName ?: ""
             guardianRelationship = s.guardianRelationship ?: ""
             guardianPhone = s.guardianPhone ?: ""
@@ -118,7 +115,6 @@ fun SantriFormScreen(
         if (santri != null) {
             selectedClass = lookups.classes.find { it.name == santri?.schoolClass }
             selectedMajor = lookups.majors.find { it.name == santri?.major }
-            selectedDormitory = lookups.dormitories.find { it.name == santri?.dormitory }
         }
     }
 
@@ -136,8 +132,6 @@ fun SantriFormScreen(
                         "birth_date" to birthDate.takeIf { it.isNotBlank() },
                         "class_id" to selectedClass?.id,
                         "major_id" to selectedMajor?.id,
-                        "dormitory_id" to selectedDormitory?.id,
-                        "dorm_room" to dormRoom.takeIf { it.isNotBlank() },
                         "guardian_name" to guardianName.takeIf { it.isNotBlank() },
                         "guardian_relationship" to guardianRelationship.takeIf { it.isNotBlank() },
                         "guardian_phone" to guardianPhone.takeIf { it.isNotBlank() },
@@ -241,7 +235,7 @@ fun SantriFormScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Filled.School, null, tint = Secondary, modifier = Modifier.size(20.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text("Pendidikan & Hunian", fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = OnAppBackground)
+                Text("Pendidikan", fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = OnAppBackground)
                 }
                 DeisaCard {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -258,20 +252,6 @@ fun SantriFormScreen(
                             selectedItem = selectedMajor,
                             onItemSelected = { selectedMajor = it },
                             itemLabel = { it.name }
-                        )
-                        DeisaDropdown(
-                            label = "Asrama",
-                            items = lookups.dormitories,
-                            selectedItem = selectedDormitory,
-                            onItemSelected = { selectedDormitory = it },
-                            itemLabel = { it.name }
-                        )
-                        OutlinedTextField(
-                            value = dormRoom, onValueChange = { dormRoom = it },
-                            label = { Text("Nomor Kamar") },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Secondary, unfocusedBorderColor = AppSurfaceVariant)
                         )
                     }
                 }
