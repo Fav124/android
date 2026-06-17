@@ -53,7 +53,8 @@ fun HospitalReferralDetailScreen(
             HospitalReferralDetailContent(
                 referral = referral!!, 
                 modifier = Modifier.padding(pv),
-                onNotifyGuardian = { viewModel.notifyGuardian(id) }
+                onNotifyGuardian = { viewModel.notifyGuardian(id) },
+                onChangeStatus = { status -> viewModel.updateStatus(id, status) }
             )
         }
     }
@@ -63,8 +64,14 @@ fun HospitalReferralDetailScreen(
 private fun HospitalReferralDetailContent(
     referral: HospitalReferral, 
     modifier: Modifier = Modifier,
-    onNotifyGuardian: () -> Unit
+    onNotifyGuardian: () -> Unit,
+    onChangeStatus: (String) -> Unit
 ) {
+    val statusOptions = listOf(
+        "pending" to "Pending",
+        "ongoing" to "Diproses",
+        "completed" to "Selesai",
+    )
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -93,6 +100,34 @@ private fun HospitalReferralDetailContent(
             Icon(Icons.Filled.Message, null, Modifier.size(18.dp), tint = OnPrimary)
             Spacer(Modifier.width(8.dp))
             Text("Kirim Notifikasi WhatsApp", fontWeight = FontWeight.Bold, color = OnPrimary)
+        }
+
+        // Status Management
+        SectionHeader("Ubah Status")
+        DeisaCard {
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                statusOptions.forEach { (value, label) ->
+                    val isActive = referral.status == value
+                    Button(
+                        onClick = { onChangeStatus(value) },
+                        enabled = !isActive,
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 10.dp),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Primary,
+                            contentColor = OnPrimary,
+                            disabledContainerColor = AppSurfaceVariant,
+                            disabledContentColor = MutedText,
+                        ),
+                    ) {
+                        Text(label, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
         }
 
         // Clinical Details

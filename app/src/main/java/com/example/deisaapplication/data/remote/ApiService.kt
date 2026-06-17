@@ -206,6 +206,9 @@ interface ApiService {
     @PUT("rujukan/{id}")
     suspend fun updateReferral(@Path("id") id: Int, @Body body: Map<String, @JvmSuppressWildcards Any?>): Response<ApiResponse<HospitalReferral>>
 
+    @PATCH("rujukan/{id}/status")
+    suspend fun updateReferralStatus(@Path("id") id: Int, @Body body: Map<String, @JvmSuppressWildcards Any?>): Response<ApiResponse<HospitalReferral>>
+
     @DELETE("rujukan/{id}")
     suspend fun deleteReferral(@Path("id") id: Int): Response<ApiResponse<Unit>>
 

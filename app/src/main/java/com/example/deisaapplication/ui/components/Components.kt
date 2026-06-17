@@ -127,6 +127,8 @@ fun StatusBadge(status: String, label: String) {
         "handled"           -> { badgeColor = Secondary.copy(alpha = 0.15f); textColor = Secondary }
         "recovered"         -> { badgeColor = Primary.copy(alpha = 0.15f); textColor = Primary }
         "referred"          -> { badgeColor = AppError.copy(alpha = 0.15f); textColor = AppError }
+        "ongoing"           -> { badgeColor = Secondary.copy(alpha = 0.15f); textColor = Secondary }
+        "completed"         -> { badgeColor = Primary.copy(alpha = 0.15f); textColor = Primary }
         "aman"              -> { badgeColor = Primary.copy(alpha = 0.15f); textColor = Primary }
         "stok_kritis"       -> { badgeColor = AppError.copy(alpha = 0.15f); textColor = AppError }
         "kadaluarsa"        -> { badgeColor = AppError.copy(alpha = 0.15f); textColor = AppError }

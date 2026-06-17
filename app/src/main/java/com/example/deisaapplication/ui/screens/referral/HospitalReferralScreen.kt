@@ -36,8 +36,8 @@ fun HospitalReferralScreen(
     var search by remember { mutableStateOf("") }
 
     val statusFilters = listOf(
-        null to "Semua", "referred" to "Dirujuk",
-        "treated" to "Dalam Perawatan", "returned" to "Dipulangkan",
+        null to "Semua", "pending" to "Pending",
+        "ongoing" to "Diproses", "completed" to "Selesai",
     )
 
     LaunchedEffect(state.toast) {
@@ -146,6 +146,7 @@ fun HospitalReferralScreen(
                                 canManageData = canManageData,
                                 onClick = { onViewDetail(ref.id) },
                                 onNotify = { viewModel.notifyGuardian(ref.id) },
+                                onChangeStatus = { status -> viewModel.updateStatus(ref.id, status) },
                                 onDelete = { viewModel.delete(ref.id) },
                             )
                         }
@@ -163,9 +164,17 @@ private fun ReferralItem(
     canManageData: Boolean,
     onClick: () -> Unit,
     onNotify: () -> Unit,
+    onChangeStatus: (String) -> Unit,
     onDelete: () -> Unit,
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showStatusMenu by remember { mutableStateOf(false) }
+
+    val statusOptions = listOf(
+        "pending" to "Pending",
+        "ongoing" to "Diproses",
+        "completed" to "Selesai",
+    )
 
     DeisaCard(modifier = Modifier.clickable(onClick = onClick)) {
         Column(Modifier.fillMaxWidth()) {
@@ -184,6 +193,25 @@ private fun ReferralItem(
                 Text(ref.referralDate ?: "", fontSize = 11.sp, color = MutedText)
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     SmallActionButton(Icons.Filled.Message, "WA", Primary, onNotify)
+                    Box {
+                        SmallActionButton(Icons.Filled.SwapHoriz, "Status", Secondary) { showStatusMenu = true }
+                        DropdownMenu(
+                            expanded = showStatusMenu,
+                            onDismissRequest = { showStatusMenu = false },
+                            containerColor = AppSurface,
+                        ) {
+                            statusOptions.forEach { (value, label) ->
+                                DropdownMenuItem(
+                                    text = { Text(label, color = if (ref.status == value) Primary else OnAppBackground) },
+                                    enabled = ref.status != value,
+                                    onClick = {
+                                        showStatusMenu = false
+                                        onChangeStatus(value)
+                                    },
+                                )
+                            }
+                        }
+                    }
                     if (canManageData) {
                         SmallActionButton(Icons.Filled.DeleteOutline, "Hapus", AppError) { showDeleteDialog = true }
                     }
