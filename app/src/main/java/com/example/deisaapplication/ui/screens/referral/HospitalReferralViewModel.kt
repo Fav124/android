@@ -95,6 +95,22 @@ class HospitalReferralViewModel(private val repo: HospitalReferralRepository) : 
         }
     }
 
+    fun updateStatus(id: Int, status: String) {
+        viewModelScope.launch {
+            repo.updateStatus(id, status)
+                .onSuccess { resp ->
+                    if (resp.isSuccessful) {
+                        _state.update { it.copy(toast = resp.body()?.message ?: "Status diperbarui.") }
+                        loadList()
+                        if (_selectedReferral.value?.id == id) loadDetail(id)
+                    } else {
+                        _state.update { it.copy(toast = "Gagal mengubah status.") }
+                    }
+                }
+                .onFailure { _state.update { st -> st.copy(toast = "Gagal: ${it.message}") } }
+        }
+    }
+
     fun notifyGuardian(id: Int) {
         viewModelScope.launch {
             repo.notifyGuardian(id)

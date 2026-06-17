@@ -98,6 +98,8 @@ class HospitalReferralRepository {
 
     suspend fun update(id: Int, body: Map<String, Any?>) = runCatching { api.updateReferral(id, body) }
 
+    suspend fun updateStatus(id: Int, status: String) = runCatching { api.updateReferralStatus(id, mapOf("status" to status)) }
+
     suspend fun delete(id: Int) = runCatching { api.deleteReferral(id) }
 
     suspend fun notifyGuardian(id: Int) = runCatching { api.notifyReferralGuardian(id) }
